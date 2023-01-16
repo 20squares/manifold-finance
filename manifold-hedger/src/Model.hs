@@ -15,6 +15,12 @@ import Types
 This file contains the main model components
 -}
 
+-- TODO
+-- 1. Check the type of actions
+-- 2. Construct the overall game
+-- 3. Run primitive analysis and verify existing results
+-- 4. Adapt for an inclusion of more refined information from the outside
+
 --------------------
 -- 1. Representation
 -- 1.1. Buyer
