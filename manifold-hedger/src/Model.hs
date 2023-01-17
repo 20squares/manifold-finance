@@ -17,9 +17,12 @@ import Types
 This file contains the main model components
 -}
 
--- TODO Plan
+-- TODO
 -- We assume the contract as given; there is no need to optimize over the contract in the first step; can be changed later.
--- We ignore blockinformation for now; this seems like something that can be abstracted away in the concerns made in this paper here
+-- NOTE We ignore blockinformation for now; this seems like something that can be abstracted away in the concerns made in this paper here
+-- NOTE We assume that the main relevance for manifold is to decide the seller decision; no need to extensively optimize over buyer decision to choose a contract; we need to think this through
+-- NOTE The utility assumption on the player might require private information; need to think about this as well
+-- Check the exact deliverable format
 -- Construct the overall game with an eye on having differential information for the different players
 -- Run primitive analysis and verify existing results
 -- Adapt for an inclusion of more refined information from the outside
@@ -108,18 +111,24 @@ noLHBuyer buyerName sellerName = [opengame|
   |]
 
 -- | Buyer recoup LH
-recoupLHBuyer buyerName = [opengame|
+recoupLHBuyer buyerName sellerName = [opengame|
 
-   inputs    : pi ;
+   inputs    : tx, pi, contract;
    feedback  : ;
 
    :----------------------------:
-   inputs    : pi ;
+   inputs    : tx, pi, contract ;
    feedback  : ;
    operation : dependentDecision buyerName (const [Refund,Forfeit]);
    outputs   : recoupDecision ;
-   returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+   returns   : recoupLHPayoffBuyer contract pi recoupDecision ;
+
+   inputs    : tx, pi;
+   feedback  : ;
+   operation : noLHBuyer buyerName sellerName ;
+   outputs   : ;
+   returns   : ;
+   // NOTE the game above mirrors the decision in the noLHBuyer case
 
    :----------------------------:
 
@@ -131,7 +140,7 @@ recoupLHBuyer buyerName = [opengame|
 -- TODO reuse noLHBuyer from above?
 publishLHBuyer buyerName = [opengame|
 
-   inputs    : pi ;
+   inputs    : tx, pi, contract ;
    feedback  : ;
 
    :----------------------------:
@@ -140,11 +149,18 @@ publishLHBuyer buyerName = [opengame|
    operation : dependentDecision buyerName (const [Publish,NoOp]);
    outputs   : publishDecision ;
    returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+   // No Payoffs at this stage
+
+   inputs    : publishDecision ;
+   feedback  : ;
+   operation : forwardFunction transformPublishDecision ;
+   outputs   : publishDecisionGame ;
+   returns   : ;
+   // Translates buyer choice into branching type
 
    :----------------------------:
 
-   outputs   : publishDecision ;
+   outputs   : publishDecisionGame ;
    returns   : ;
   |]
 
@@ -162,25 +178,46 @@ acceptLHSeller sellerName = [opengame|
    outputs   : acceptanceDecision ;
    returns   : acceptLHPayoffSeller contract pi ;
 
+   inputs    : acceptanceDecision ;
+   feedback  : ;
+   operation : forwardFunction transformAcceptDecision ;
+   outputs   : acceptanceDecisionGame ;
+   returns   : ;
+   // Translates seller choice into branching type
+
    :----------------------------:
 
-   outputs   : acceptanceDecision ;
+   outputs   : acceptanceDecisionGame ;
    returns   : ;
   |]
 
 -- | fulfill LH seller if published
-fulfillLHSellerPublished sellerName = [opengame|
+fulfillLHSellerPublished buyerName sellerName = [opengame|
 
-   inputs    : pi, publishParameter ;
+   inputs    : contract,tx,pi ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : pi, publishParameter ;
+   inputs    : contract,tx, pi ;
    feedback  : ;
    operation : dependentDecision sellerName (const [Confirm, Exhaust, Ignore]);
    outputs   : fulfillDecision ;
-   returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+   returns   : fulfillLHPayoffSeller contract tx pi fulfillDecision ;
+
+   inputs    : contract,tx, pi, fulfillDecision ;
+   feedback  : ;
+   operation : forwardFunction $ fulfillLHPayoffBuyer ;
+   outputs   : payoffBuyer ;
+   returns   : ;
+   // Compute payoffs for buyer
+
+   inputs    : payoffBuyer ;
+   feedback  : ;
+   operation : addPayoffs buyerName ;
+   outputs   : ;
+   returns   : ;
+   // Book-keeping for buyer's payoffs
+
 
    :----------------------------:
 
@@ -190,18 +227,33 @@ fulfillLHSellerPublished sellerName = [opengame|
 
 
 -- | fulfill LH seller if no-op
-fulfillLHSellerNoOp sellerName = [opengame|
+fulfillLHSellerNoOp buyerName sellerName = [opengame|
 
-   inputs    : pi, noOpParameter ;
+   inputs    : contract,tx,pi ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : pi, noOpParameter ;
+   inputs    : contract,tx,pi ;
    feedback  : ;
    operation : dependentDecision sellerName (const [Exhaust, Ignore]);
    outputs   : fulfillDecision ;
-   returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+   returns   : fulfillLHPayoffSeller contract tx pi fulfillDecision ;
+   // NOTE: we restrict the strategy space - the rest of the game is the same as before
+
+   inputs    : contract,tx, pi, fulfillDecision ;
+   feedback  : ;
+   operation : forwardFunction $ fulfillLHPayoffBuyer ;
+   outputs   : payoffBuyer ;
+   returns   : ;
+   // Compute payoffs for buyer
+
+   inputs    : payoffBuyer ;
+   feedback  : ;
+   operation : addPayoffs buyerName ;
+   outputs   : ;
+   returns   : ;
+   // Book-keeping for buyer's payoffs
+
 
    :----------------------------:
 

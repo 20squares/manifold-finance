@@ -11,6 +11,10 @@ actionSpaceInitLHBuyer (_, contract,_) = [Wait, Initiate contract]
 transformInitiateDecision Wait                =  Left ()
 transformInitiateDecision (Initiate contract) = Right contract
 
--- | Transform decision into game choice
+-- | Transform accept decision into game choice
 transformAcceptDecision Decline = Left ()
 transformAcceptDecision Accept  = Right ()
+
+-- | Transform publish decision into game choice
+transformPublishDecision Publish = Left ()
+transformPublishDecision NoOp  = Right ()

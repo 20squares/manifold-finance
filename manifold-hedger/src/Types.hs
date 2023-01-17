@@ -40,6 +40,8 @@ data HLContract = HLContract
   , payment       :: Payment
   , epsilon       :: Payment
   , gasAccept     :: Gas
+  , gasDone       :: Gas
+  , gasPub        :: Gas
   } deriving (Eq,Show,Ord)
 
 -- | Transaction that the buyer wants to get implemented
