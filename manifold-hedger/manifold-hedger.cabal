@@ -25,7 +25,9 @@ source-repository head
 
 library
   exposed-modules:
+      ActionSpaces
       Model
+      Payoffs
       Types
   other-modules:
       Paths_manifold_hedger

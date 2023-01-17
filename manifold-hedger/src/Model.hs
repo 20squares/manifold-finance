@@ -9,55 +9,97 @@ module Model where
 
 import OpenGames.Engine.Engine
 import OpenGames.Preprocessor
+import ActionSpaces
+import Payoffs
 import Types
 
 {-
 This file contains the main model components
 -}
 
--- TODO
--- 1. Check the type of actions
--- 2. Construct the overall game
--- 3. Run primitive analysis and verify existing results
--- 4. Adapt for an inclusion of more refined information from the outside
+-- TODO Plan
+-- We assume the contract as given; there is no need to optimize over the contract in the first step; can be changed later.
+-- We ignore blockinformation for now; this seems like something that can be abstracted away in the concerns made in this paper here
+-- Construct the overall game with an eye on having differential information for the different players
+-- Run primitive analysis and verify existing results
+-- Adapt for an inclusion of more refined information from the outside
 
 --------------------
 -- 1. Representation
--- 1.1. Buyer
+-- 1.1. Nature
+gasPriceDistribution distribution = [opengame|
 
--- | Buyer initial decision
-initLHBuyer buyerName = [opengame|
+   inputs    :  ;
+   feedback  : ;
 
+   :----------------------------:
    inputs    : ;
    feedback  : ;
+   operation : nature distribution ;
+   outputs   : pi ;
+   returns   :  ;
 
    :----------------------------:
-   inputs    : ;  
+
+   outputs   : pi;
+   returns   :   ;
+  |]
+
+
+-- 1.2. Buyer
+-- | Buyer initial decision
+-- Given the transaction that the player wants to implement, a given hl contract, and a current gas price choose whether to initialize the hl contract or not
+initLHBuyer buyerName = [opengame|
+
+   inputs    : tx,contract,piInit ;
    feedback  : ;
-   operation : dependentDecision buyerName (const [Wait,Initiate]);
-   outputs   : contract ;
-   returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+
+   :----------------------------:
+   inputs    : tx,contract,piInit ;
+   feedback  : ;
+   operation : dependentDecision buyerName $ actionSpaceInitLHBuyer;
+   outputs   : contractDecision ;
+   returns   : initialPayoffBuyer tx contractDecision piInit ;
+
+   inputs    : contractDecision ;
+   feedback  : ;
+   operation : forwardFunction transformInitiateDecision ;
+   outputs   : contractDecisionGame ;
+   returns   : ;
+   // Translates buyer choice into branching type
 
    :----------------------------:
 
-   outputs   : contract ;
+   outputs   : tx,contractDecisionGame ;
    returns   :          ;
   |]
 
--- | Buyer no LH
-noLHBuyer buyerName = [opengame|
+-- | Buyer decision whether no LH
+noLHBuyer buyerName sellerName = [opengame|
 
-   inputs    : pi ;
+   inputs    : tx, pi ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : pi ;
+   inputs    : tx, pi ;
    feedback  : ;
    operation : dependentDecision buyerName (const [Publish, NoOp]);
    outputs   : publishDecision ;
-   returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+   returns   : noLHPayoffBuyer tx pi publishDecision ;
+
+   inputs    : tx, pi ;
+   feedback  : ;
+   operation : forwardFunction $ uncurry $ noLHPayoffSeller ;
+   outputs   : payoffSeller ;
+   returns   : ;
+   // Compute payoffs for seller
+
+   inputs    : payoffSeller ;
+   feedback  : ;
+   operation : addPayoffs sellerName ;
+   outputs   : ;
+   returns   : ;
+   // Book-keeping for seller's payoffs
 
    :----------------------------:
 
@@ -110,16 +152,15 @@ publishLHBuyer buyerName = [opengame|
 -- | Accept LH seller
 acceptLHSeller sellerName = [opengame|
 
-   inputs    : contractParameter ;
+   inputs    : contract,pi ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : contractParameter ;
+   inputs    : contract,pi ;
    feedback  : ;
    operation : dependentDecision sellerName (const [Decline,Accept]);
    outputs   : acceptanceDecision ;
-   returns   : 0 ;
-   // FIXME ^^ Check payoffs later
+   returns   : acceptLHPayoffSeller contract pi ;
 
    :----------------------------:
 
