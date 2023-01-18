@@ -260,48 +260,22 @@ publishLHBuyerRandom buyerName distribution = [opengame|
 -- | Accept LH seller
 acceptLHSeller sellerName = [opengame|
 
-   inputs    : contract,pi ;
+   inputs    : tx, contract,piInit ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : contract,pi ;
+   inputs    : tx, contract,piInit ;
    feedback  : ;
    operation : dependentDecision sellerName (const [Decline,Accept]);
    outputs   : acceptanceDecision ;
    returns   : acceptLHPayoffSeller contract pi ;
 
-   inputs    : acceptanceDecision ;
+   inputs    : acceptanceDecision, (tx, contract)  ;
    feedback  : ;
-   operation : forwardFunction transformAcceptDecision ;
+   operation : forwardFunction $ uncurry transformAcceptDecision ;
    outputs   : acceptanceDecisionGame ;
    returns   : ;
    // Translates seller choice into branching type
-
-   :----------------------------:
-
-   outputs   : acceptanceDecisionGame ;
-   returns   : ;
-  |]
-
--- | Accept LH seller with random sample
-acceptLHSellerRandom sellerName distribution = [opengame|
-
-   inputs    : contract ;
-   feedback  : ;
-
-   :----------------------------:
-
-   inputs    : ;
-   feedback  : ;
-   operation : gasPriceDistribution distribution;
-   outputs   : pi ;
-   returns   : ;
-
-   inputs    : contract,pi ;
-   feedback  : ;
-   operation : acceptLHSeller sellerName ;
-   outputs   : acceptanceDecisionGame ;
-   returns   : ;
 
    :----------------------------:
 

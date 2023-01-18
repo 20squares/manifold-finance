@@ -50,4 +50,28 @@ publishSubgame buyerName sellerName distribution = [opengame|
  where publishBranching buyerName sellerName  = (fulfillLHSellerPublished buyerName sellerName) +++ (fulfillLHSellerNoOp buyerName sellerName)
 
 -- | Initiate ~> Accepted
--- acceptBranching  buyerName sellerName distribution = (recoupLHBuyerRandom buyerName sellerName distribution) +++ (publishSubgame buyerName sellerName distribution)
+acceptSubgame buyerName sellerName distribution = [opengame|
+
+   inputs    : tx, contract,piInit ;
+   feedback  : ;
+
+   :----------------------------:
+   inputs    : tx, contract,piInit ;
+   feedback  : ;
+   operation : acceptLHSeller sellerName;
+   outputs   : acceptanceDecisionGame ;
+   returns   :  ;
+
+   inputs    : acceptanceDecisionGame ;
+   feedback  : ;
+   operation : acceptBranching buyerName sellerName distribution;
+   outputs   : discard;
+   returns   : ;
+
+   :----------------------------:
+
+   outputs   : ;
+   returns   : ;
+  |]
+ where acceptBranching  buyerName sellerName distribution = (recoupLHBuyerRandom buyerName sellerName distribution) +++ (publishSubgame buyerName sellerName distribution)
+

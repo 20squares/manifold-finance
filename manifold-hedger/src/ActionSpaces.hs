@@ -12,8 +12,8 @@ transformInitiateDecision Wait                =  Left ()
 transformInitiateDecision (Initiate contract) = Right contract
 
 -- | Transform accept decision into game choice
-transformAcceptDecision Decline = Left ()
-transformAcceptDecision Accept  = Right ()
+transformAcceptDecision Decline information = Left information
+transformAcceptDecision Accept  information = Right information
 
 -- | Transform publish decision into game choice
 transformPublishDecision Publish information = Left information
