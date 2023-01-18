@@ -8,8 +8,8 @@ import Types
 actionSpaceInitLHBuyer (_, contract,_) = [Wait, Initiate contract]
 
 -- | Transform initiate decision into game branching choice
-transformInitiateDecision Wait                =  Left ()
-transformInitiateDecision (Initiate contract) = Right contract
+transformInitiateDecision (Wait               , tx ,_) =  Left tx
+transformInitiateDecision ((Initiate contract), tx, pi )= Right (tx,contract,pi)
 
 -- | Transform accept decision into game choice
 transformAcceptDecision Decline information = Left information

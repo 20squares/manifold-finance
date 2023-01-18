@@ -22,7 +22,6 @@ We begin "backwards" by considering the last states first
 
 --------------
 -- 1. Subgames
-
 -- | Initiate ~> Accepted ~> Publish subgame
 publishSubgame buyerName sellerName distribution = [opengame|
 
@@ -47,9 +46,10 @@ publishSubgame buyerName sellerName distribution = [opengame|
    outputs   :  ;
    returns   : ;
   |]
- where publishBranching buyerName sellerName  = (fulfillLHSellerPublished buyerName sellerName) +++ (fulfillLHSellerNoOp buyerName sellerName)
+ where
+   publishBranching buyerName sellerName  = (fulfillLHSellerPublished buyerName sellerName) +++ (fulfillLHSellerNoOp buyerName sellerName)
 
--- | Initiate ~> Accepted
+-- | Initiate ~> Accepted subgame
 acceptSubgame buyerName sellerName distribution = [opengame|
 
    inputs    : tx, contract,piInit ;
@@ -73,5 +73,34 @@ acceptSubgame buyerName sellerName distribution = [opengame|
    outputs   : ;
    returns   : ;
   |]
- where acceptBranching  buyerName sellerName distribution = (recoupLHBuyerRandom buyerName sellerName distribution) +++ (publishSubgame buyerName sellerName distribution)
+ where
+   acceptBranching  buyerName sellerName distribution = (recoupLHBuyerRandom buyerName sellerName distribution) +++ (publishSubgame buyerName sellerName distribution)
+
+-- | Complete game
+completeGame buyerName sellerName distribution = [opengame|
+
+   inputs    : tx,contract,piInit ;
+   feedback  : ;
+
+   :----------------------------:
+   inputs    : tx,contract,piInit ;
+   feedback  : ;
+   operation : initLHBuyer buyerName;
+   outputs   : contractDecisionGame ;
+   returns   :  ;
+
+   inputs    : contractDecisionGame ;
+   feedback  : ;
+   operation : completeBranching buyerName sellerName distribution;
+   outputs   : discard;
+   returns   : ;
+
+   :----------------------------:
+
+   outputs   :  ;
+   returns   :  ;
+  |]
+  where
+    completeBranching buyerName sellerName distribution = (noLHBuyerRandom buyerName sellerName distribution) +++ (acceptSubgame buyerName sellerName distribution)
+
 

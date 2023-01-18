@@ -76,7 +76,7 @@ initLHBuyer buyerName = [opengame|
    outputs   : contractDecision ;
    returns   : initialPayoffBuyer tx contractDecision piInit ;
 
-   inputs    : contractDecision ;
+   inputs    : contractDecision, tx, piInit ;
    feedback  : ;
    operation : forwardFunction transformInitiateDecision ;
    outputs   : contractDecisionGame ;
@@ -85,7 +85,7 @@ initLHBuyer buyerName = [opengame|
 
    :----------------------------:
 
-   outputs   : tx,contractDecisionGame ;
+   outputs   : contractDecisionGame ;
    returns   :          ;
   |]
 
