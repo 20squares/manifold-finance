@@ -16,5 +16,5 @@ transformAcceptDecision Decline = Left ()
 transformAcceptDecision Accept  = Right ()
 
 -- | Transform publish decision into game choice
-transformPublishDecision Publish = Left ()
-transformPublishDecision NoOp  = Right ()
+transformPublishDecision Publish information = Left information
+transformPublishDecision NoOp    information = Right information

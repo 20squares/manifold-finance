@@ -30,16 +30,16 @@ recoupLHPayoffBuyer HLContract{..} price Refund  = payment + epsilon - price * g
 recoupLHPayoffBuyer HLContract{..} price Forfeit = 0 
 
 -- | Payoff for seller when fullfilling the contract
-fulfillLHPayoffSeller :: HLContract -> Transaction -> GasPrice -> FulfillDecisionSeller -> Payoff
-fulfillLHPayoffSeller HLContract{..} Transaction{..} price Exhaust = payment + collateral - ((gasDone + gasAllocTX) * price)
-fulfillLHPayoffSeller HLContract{..} Transaction{..} price Ignore =  gasAllocTX * price
-fulfillLHPayoffSeller HLContract{..} Transaction{..} price Confirm = payment + collateral + epsilon - ((gasAllocTX - (gasPub + gasDone))*price)
+fulfillLHPayoffSeller :: Transaction -> HLContract ->  GasPrice -> FulfillDecisionSeller -> Payoff
+fulfillLHPayoffSeller Transaction{..} HLContract{..}  price Exhaust = payment + collateral - ((gasDone + gasAllocTX) * price)
+fulfillLHPayoffSeller Transaction{..} HLContract{..} price Ignore =  gasAllocTX * price
+fulfillLHPayoffSeller Transaction{..} HLContract{..} price Confirm = payment + collateral + epsilon - ((gasAllocTX - (gasPub + gasDone))*price)
 
 -- | Payoff for buyer conditional on the fulfillment decision
 -- NOTE we build in the decision to transact when exhaust or ignore decisions by seller are made
 -- FIXME this still needs to be checked; does the buyer receive any value back? 
-fulfillLHPayoffBuyer :: (HLContract, Transaction, GasPrice, FulfillDecisionSeller) -> Payoff
-fulfillLHPayoffBuyer (HLContract{..}, Transaction{..}, price, decision) =
+fulfillLHPayoffBuyer :: (Transaction, HLContract, GasPrice, FulfillDecisionSeller) -> Payoff
+fulfillLHPayoffBuyer ( Transaction{..}, HLContract{..}, price, decision) =
   case decision of
     Exhaust -> maximum [0,netUtility]
     Ignore  -> maximum [0,netUtility]
