@@ -59,17 +59,8 @@ Let us now describe the action space:
 
 In formalizing our model, we had to make explicit some assumptions that were kept implicit in the paper.
 
-- First of all, we have to state explicitly which notion of risk the players in the paper ($Buyer$ and $Seller$, respectively) have. Indeed, for $Buyer$ we can distinguish three different notions of risk:
-    - Risk-averse: $Buyer$ thinks that $\pi_{exec}$ will rise with respect to the current gas price.
-    - Risk-prone: $Seller$ believes that $\pi_{exec}$ will fall with respect to the current gas price.
-    - Risk-neutral: $Buyer$ is unbiased.
+- First of all, the payoffs had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much $Seller$ gains, in cases such as $No-op$ the utility is not clear: If one says that the payoff is 0 (no gas gets spent whatsoever), then $Buyer$ would default to $Wait$ and $No-op$ all the time. It is clear, then, that the transaction that $Buyer$ wants to issue has some *intrinsic utility*.
+- We assumed that operations had costs: In the paper, actions such as $Initiate$ or $Accept$ are *costless*, 
 
-    Things for $Seller$ are reversed:
-    - Risk-averse: $Seller$ thinks that $\pi_{exec}$ will fall with respect to the current gas price.
-    - Risk-prone: $Seller$ believes that $\pi_{exec}$ will rise with respect to the current gas price.
-    - Risk-neutral: $Seller$ is unbiased.
 
-    Ledger Hedger supposes that both $Buyer$ and $Seller$ are risk-averse, or at least risk-neutral: We see how this is a crucial assumption: Believing that gas prices will rise, $Buyer$ is incentivized to look for a hedging position and thus to using Hedger Ledger with a $\pi_{contract}$ lower than the expected $\pi_{exec}$. Similarly, by believing that gas prices will fall, $Seller$ is incentivized to accept this proposition, as in $Seller$'s view $\pi_{contract} > \pi_{exec}$. If either player is risk-neutral, then using or not using Hedger Ledger makes no difference, provided that using Hedger Ledger has no cost of capital.
-
-    In our model, players come endowed with a given notion of risk, expressed 
-
+- First of all, we have to state explicitly which notion of risk the players in the paper ($Buyer$ and $Seller$, respectively) have. 
