@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Types where
 
@@ -10,8 +11,8 @@ data InitialDecisionBuyer a = Wait | Initiate a
      deriving (Eq,Ord,Show)
 
 -- | Publication decision buyer
-data PublishDecision = Publish | NoOp
-  deriving (Eq,Ord,Show)
+data PublishDecision a = NoOp | Publish a
+  deriving (Eq,Ord,Show, Functor)
 
 -- | Recoup decision buyer
 data RecoupDecisionBuyer = Refund | Forfeit
@@ -41,7 +42,6 @@ data HLContract = HLContract
   , epsilon       :: Payment
   , gasAccept     :: Gas
   , gasDone       :: Gas
-  , gasPub        :: Gas
   } deriving (Eq,Show,Ord)
 
 -- | Transaction that the buyer wants to get implemented

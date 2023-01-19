@@ -23,7 +23,7 @@ We begin "backwards" by considering the last states first
 --------------
 -- 1. Subgames
 -- | Initiate ~> Accepted ~> Publish subgame
-publishSubgame buyerName sellerName distribution = [opengame|
+publishSubgame buyerName sellerName distribution possibleGasPubLS = [opengame|
 
    inputs    : tx, contract ;
    feedback  : ;
@@ -31,7 +31,7 @@ publishSubgame buyerName sellerName distribution = [opengame|
    :----------------------------:
    inputs    : tx, contract ;
    feedback  : ;
-   operation : publishLHBuyerRandom buyerName distribution ;
+   operation : publishLHBuyerRandom buyerName distribution  possibleGasPubLS;
    outputs   : publishDecisionGame ;
    returns   :  ;
 
@@ -50,7 +50,7 @@ publishSubgame buyerName sellerName distribution = [opengame|
    publishBranching buyerName sellerName  = (fulfillLHSellerPublished buyerName sellerName) +++ (fulfillLHSellerNoOp buyerName sellerName)
 
 -- | Initiate ~> Accepted subgame
-acceptSubgame buyerName sellerName distribution = [opengame|
+acceptSubgame buyerName sellerName distribution possibleGasPubLS = [opengame|
 
    inputs    : tx, contract,piInit ;
    feedback  : ;
@@ -64,7 +64,7 @@ acceptSubgame buyerName sellerName distribution = [opengame|
 
    inputs    : acceptanceDecisionGame ;
    feedback  : ;
-   operation : acceptBranching buyerName sellerName distribution;
+   operation : acceptBranching buyerName sellerName distribution possibleGasPubLS;
    outputs   : discard;
    returns   : ;
 
@@ -74,10 +74,10 @@ acceptSubgame buyerName sellerName distribution = [opengame|
    returns   : ;
   |]
  where
-   acceptBranching  buyerName sellerName distribution = (recoupLHBuyerRandom buyerName sellerName distribution) +++ (publishSubgame buyerName sellerName distribution)
+   acceptBranching  buyerName sellerName distribution possibleGasPubLS = (recoupLHBuyerRandom buyerName sellerName distribution) +++ (publishSubgame buyerName sellerName distribution possibleGasPubLS)
 
 -- | Complete game
-completeGame buyerName sellerName distribution = [opengame|
+completeGame buyerName sellerName distribution possibleGasPubLS = [opengame|
 
    inputs    : tx,contract,piInit ;
    feedback  : ;
@@ -101,6 +101,6 @@ completeGame buyerName sellerName distribution = [opengame|
    returns   :  ;
   |]
   where
-    completeBranching buyerName sellerName distribution = (noLHBuyerRandom buyerName sellerName distribution) +++ (acceptSubgame buyerName sellerName distribution)
+    completeBranching buyerName sellerName distribution = (noLHBuyerRandom buyerName sellerName distribution) +++ (acceptSubgame buyerName sellerName distribution possibleGasPubLS)
 
 

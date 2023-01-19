@@ -17,16 +17,14 @@ import Types
 This file contains the main model components
 -}
 
--- TODO
--- We assume the contract as given; there is no need to optimize over the contract in the first step; can be changed later.
--- NOTE We ignore blockinformation for now; this seems like something that can be abstracted away in the concerns made in this paper here
+-- NOTE We assume the contract as given; there is no need to optimize over the contract in the first step; can be changed later. 
 -- NOTE We assume that the main relevance for manifold is to decide the seller decision; no need to extensively optimize over buyer decision to choose a contract; we need to think this through
+-- NOTE We ignore blockinformation for now; this seems like something that can be abstracted away in the concerns made in this paper here
 -- NOTE The utility assumption on the player might require private information; need to think about this as well
--- Check the exact deliverable format
--- Construct the overall game with an eye on having differential information for the different players
--- Run primitive analysis and verify existing results
--- Adapt for an inclusion of more refined information from the outside
-
+-- TODO Check the exact deliverable format
+-- TODO Construct the overall game with an eye on having differential information for the different players: The best way probably would be for the seller to observe something initially which affects the distribution at time T. So that the probability distribution is a stochastic channel.
+-- TODO This also needs to be constructed with the possibility of importing information from the outset.
+-- TODO Run primitive analysis and verify existing results
 --------------------
 -- 1. Representation
 -- 1.1. Nature
@@ -98,7 +96,8 @@ noLHBuyer buyerName sellerName = [opengame|
    :----------------------------:
    inputs    : tx, pi ;
    feedback  : ;
-   operation : dependentDecision buyerName (const [Publish, NoOp]);
+   operation : dependentDecision buyerName (const [NoOp, Publish 0]);
+   // NOTE ignore the gasPub variable 
    outputs   : publishDecision ;
    returns   : noLHPayoffBuyer tx pi publishDecision ;
 
@@ -203,7 +202,7 @@ recoupLHBuyerRandom buyerName sellerName distribution= [opengame|
   
 -- | Buyer publish TX
 -- TODO reuse noLHBuyer from above?
-publishLHBuyer buyerName = [opengame|
+publishLHBuyer buyerName possibleGasPubLS= [opengame|
 
    inputs    : tx, contract, pi  ;
    feedback  : ;
@@ -211,12 +210,20 @@ publishLHBuyer buyerName = [opengame|
    :----------------------------:
    inputs    : pi ;
    feedback  : ;
-   operation : dependentDecision buyerName (const [Publish,NoOp]);
+   operation : dependentDecision buyerName (const [NoOp, Publish 0]);
+   // This is a hack to refine choice of gPub in the next decision
    outputs   : publishDecision ;
    returns   : 0 ;
    // No Payoffs at this stage
 
-   inputs    : publishDecision, (tx, contract, pi);
+   inputs    : pi,tx,publishDecision ;
+   feedback  : ;
+   operation : dependentDecision buyerName $ actionSpacePublishLHBuyer possibleGasPubLS ;
+   outputs   : publishDecisionRefined ;
+   returns   : 0 ;
+   // No Payoffs at this stage
+
+   inputs    : publishDecisionRefined, (tx, contract, pi);
    feedback  : ;
    operation : forwardFunction $ uncurry transformPublishDecision ;
    outputs   : publishDecisionGame ;
@@ -231,7 +238,7 @@ publishLHBuyer buyerName = [opengame|
 
 -- | Buyer publish TX with random sample
 -- TODO reuse noLHBuyer from above?
-publishLHBuyerRandom buyerName distribution = [opengame|
+publishLHBuyerRandom buyerName distribution possibleGasPubLS = [opengame|
 
    inputs    : tx, contract ;
    feedback  : ;
@@ -245,7 +252,7 @@ publishLHBuyerRandom buyerName distribution = [opengame|
 
    inputs    : tx, contract, pi ;
    feedback  : ;
-   operation : publishLHBuyer buyerName;
+   operation : publishLHBuyer buyerName possibleGasPubLS;
    outputs   : publishDecisionGame ;
    returns   :  ;
 
@@ -286,15 +293,15 @@ acceptLHSeller sellerName = [opengame|
 -- | fulfill LH seller if published
 fulfillLHSellerPublished buyerName sellerName = [opengame|
 
-   inputs    : tx,contract,pi ;
+   inputs    : tx,contract,pi,gasPub ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx, contract, pi ;
+   inputs    : tx, contract, pi, gasPub ;
    feedback  : ;
    operation : dependentDecision sellerName (const [Confirm, Exhaust, Ignore]);
    outputs   : fulfillDecision ;
-   returns   : fulfillLHPayoffSeller tx contract pi fulfillDecision ;
+   returns   : fulfillLHPayoffSeller tx contract gasPub pi fulfillDecision ;
 
    inputs    : tx, contract, pi, fulfillDecision ;
    feedback  : ;
@@ -327,11 +334,11 @@ fulfillLHSellerNoOp buyerName sellerName = [opengame|
    inputs    : tx, contract, pi ;
    feedback  : ;
    operation : dependentDecision sellerName (const [Exhaust, Ignore]);
-   outputs   : fulfillDecision ;
-   returns   : fulfillLHPayoffSeller tx contract pi fulfillDecision ;
+   outputs   : noFulfillDecision ;
+   returns   : noFulfillLHPayoffSeller tx contract pi noFulfillDecision ;
    // NOTE: we restrict the strategy space - the rest of the game is the same as before
 
-   inputs    : tx, contract, pi, fulfillDecision ;
+   inputs    : tx, contract, pi, noFulfillDecision ;
    feedback  : ;
    operation : forwardFunction $ fulfillLHPayoffBuyer ;
    outputs   : payoffBuyer ;
@@ -348,7 +355,7 @@ fulfillLHSellerNoOp buyerName sellerName = [opengame|
 
    :----------------------------:
 
-   outputs   : fulfillDecision ;
+   outputs   : noFulfillDecision ;
    returns   : ;
   |]
 
