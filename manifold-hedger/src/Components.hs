@@ -157,14 +157,22 @@ recoupLHBuyer buyerName sellerName = [opengame|
    feedback  : ;
    operation : dependentDecision buyerName (const [Refund,Forfeit]);
    outputs   : recoupDecision ;
-   returns   : recoupLHPayoffBuyer contract pi recoupDecision ;
+   returns   : recoupLHPayoffBuyer tx contract pi recoupDecision ;
+   // NOTE we make a shortcut for the buyer's decision to run the tx
 
-   inputs    : tx, pi;
+   inputs    : tx, pi ;
    feedback  : ;
-   operation : noLHBuyer buyerName sellerName ;
+   operation : forwardFunction $ uncurry $ recoupLHPayoffSeller ;
+   outputs   : payoffSeller ;
+   returns   : ;
+   // Compute payoffs for seller 
+
+   inputs    : payoffSeller ;
+   feedback  : ;
+   operation : addPayoffs sellerName ;
    outputs   : ;
    returns   : ;
-   // NOTE the game above mirrors the decision in the noLHBuyer case
+   // Book-keeping for seller's payoffs
 
    :----------------------------:
 

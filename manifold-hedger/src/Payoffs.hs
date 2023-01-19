@@ -8,7 +8,7 @@ import Types
 -- | Payoff for initiating the contract
 initialPayoffBuyer :: Transaction -> InitialDecisionBuyer HLContract -> GasPrice -> Payoff
 initialPayoffBuyer _ Wait _ = 0
-initialPayoffBuyer Transaction{..} (Initiate HLContract{..}) price = - (gasInitiation * price ) - payment - epsilon -- ^ TODO check the payment and epsilon component later
+initialPayoffBuyer Transaction{..} (Initiate HLContract{..}) price = - (gasInitiation * price ) - payment - epsilon 
 
 -- | Payoff for buyer when no initialized contract
 noLHPayoffBuyer :: Transaction -> GasPrice -> (PublishDecision Gas) -> Payoff
@@ -19,15 +19,20 @@ noLHPayoffBuyer Transaction{..} price (Publish _) = utilityFromTX - (gasAllocTX 
 noLHPayoffSeller :: Transaction -> GasPrice -> Payoff
 noLHPayoffSeller Transaction{..} price = gasAllocTX * price
 
+-- | Alias for the recoup case
+recoupLHPayoffSeller = noLHPayoffSeller
+
 -- | Payoff for seller when accepting the hl contract
--- TODO check units for collateral
 acceptLHPayoffSeller :: HLContract -> GasPrice -> Payoff
 acceptLHPayoffSeller HLContract{..} price = - (gasAccept * price) - collateral
 
 -- | Payoff for buyer when recouping the hl contract
-recoupLHPayoffBuyer :: HLContract -> GasPrice ->  RecoupDecisionBuyer ->  Payoff
-recoupLHPayoffBuyer HLContract{..} price Refund  = payment + epsilon - price * gasDone -- ^ TODO Check the payment and epsilon
-recoupLHPayoffBuyer HLContract{..} price Forfeit = 0 
+recoupLHPayoffBuyer :: Transaction -> HLContract -> GasPrice ->  RecoupDecisionBuyer ->  Payoff
+recoupLHPayoffBuyer Transaction{..} HLContract{..} price Refund  = payment + epsilon - price * gasDone 
+recoupLHPayoffBuyer Transaction{..} HLContract{..} price Forfeit = maximum [0,netUtility]
+  where
+    netUtility = utilityFromTX - (gasAllocTX * price)
+
 
 -- | Payoff for seller when fullfilling the contract
 fulfillLHPayoffSeller :: Transaction -> HLContract -> Gas ->  GasPrice -> FulfillDecisionSeller -> Payoff
@@ -48,5 +53,6 @@ fulfillLHPayoffBuyer ( Transaction{..}, HLContract{..}, price, decision) =
     Exhaust -> maximum [0,netUtility]
     Ignore  -> maximum [0,netUtility]
     Confirm -> utilityFromTX -- ^ FIXME ?
-  where netUtility = utilityFromTX - (gasAllocTX * price)
+  where
+    netUtility = utilityFromTX - (gasAllocTX * price)
 
