@@ -52,11 +52,11 @@ publishSubgame buyerName sellerName distribution possibleGasPubLS = [opengame|
 -- | Initiate ~> Accepted subgame
 acceptSubgame buyerName sellerName distribution possibleGasPubLS = [opengame|
 
-   inputs    : tx, contract,piInit ;
+   inputs    : tx, contract,piInitial ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx, contract,piInit ;
+   inputs    : tx, contract,piInitial ;
    feedback  : ;
    operation : acceptLHSeller sellerName;
    outputs   : acceptanceDecisionGame ;
@@ -79,11 +79,11 @@ acceptSubgame buyerName sellerName distribution possibleGasPubLS = [opengame|
 -- | Complete game
 completeGame buyerName sellerName distribution possibleGasPubLS = [opengame|
 
-   inputs    : tx,contract,piInit ;
+   inputs    : tx,contract,piInitial ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx,contract,piInit ;
+   inputs    : tx,contract,piInitial ;
    feedback  : ;
    operation : initLHBuyer buyerName;
    outputs   : contractDecisionGame ;

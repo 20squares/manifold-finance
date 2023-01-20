@@ -1,8 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
 
-module Types where
+module Types
+  where
 
+import OpenGames.Engine.Engine
 
 -- 1. Action types
 
@@ -54,4 +56,15 @@ data Transaction = Transaction
 
 -- 3. Payoff types
 type Payoff = Double
+
+-- 4. Interface type
+data Parameters = Parameters
+  { buyerName :: String
+  , sellerName :: String
+  , distribution :: Stochastic Gas
+  , actionSpaceGasPub :: [Gas]
+  , transaction :: Transaction
+  , contract :: HLContract
+  , piInitial :: GasPrice
+  } deriving (Eq,Show)
 
