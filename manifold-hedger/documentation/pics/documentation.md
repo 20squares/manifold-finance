@@ -197,7 +197,27 @@ Branching is represented using the operator `+++`. So, for instance, if `SubGame
 
 Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are very complicated to draw, this depiction is rarely used.
 
-#### 
+#### Stochasticity
+Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
+
+Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
+
+A consequence of this is that deterministic strategic decisions (e.g. 'player chooses option A') must be lifted into the stochastic monad, getting thus transformed into their probabilistic equivalent (e.g. 'of all the option available, player chooses A with probability 1')
+
+A practical example of this can be found in `Analytics.hs`, where we have:
+
+```
+acceptStrategy
+  :: Kleisli
+       Stochastic
+       (Transaction, HLContract, GasPrice)
+       AcceptDecisionSeller
+acceptStrategy = pureAction Accept
+```
+
+`pureAction` lifts the deterministic choice `Accept` to the probabilistic concept.
+
+The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
 ### File structure
 
