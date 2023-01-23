@@ -30,6 +30,7 @@ library
       Components
       Diagnostics
       Model
+      Parameterization
       Payoffs
       Types
   other-modules:
