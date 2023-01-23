@@ -13,6 +13,8 @@ import Model
 import Payoffs
 import Types 
 
+import Numeric.Probability.Distribution (normal)
+
 {-
 Defines the concrete parameterizations used for the analysis
 -}
@@ -50,12 +52,18 @@ testTransaction = Transaction
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
-testDistribution = uniformDist [1.0,2.0,3.0,4.0,5.0]
+testDistribution = normal [0.25,0.5..5.0]
 
 testActionSpaceGasPub = [6.0,8.0,10.0,12.0,14.0]
 
+
+--------------------------
+-- 4. Utility functions
+logUtility x = log x
+
+squareRootUtility x = sqrt x
 -------------------------
--- 4. Complete parameters
+-- 5. Complete parameters
 parameters = Parameters
   "buyer"
   "seller"
@@ -64,4 +72,5 @@ parameters = Parameters
   testTransaction
   testContract
   3
-  
+  squareRootUtility
+  squareRootUtility

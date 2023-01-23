@@ -28,18 +28,6 @@ This file contains the main model components
 --------------------
 -- 1. Representation
 -- 1.1. Nature
-
-gasPriceDistribution
-  :: Stochastic GasPrice
-     -> OpenGame
-          StochasticStatefulOptic
-          StochasticStatefulContext
-          '[]
-          '[]
-          ()
-          ()
-          GasPrice
-          ()
 gasPriceDistribution distribution = [opengame|
 
    inputs    :  ;
@@ -62,23 +50,6 @@ gasPriceDistribution distribution = [opengame|
 -- 1.2. Buyer
 -- | Buyer initial decision
 -- Given the transaction that the player wants to implement, a given hl contract, and a current gas price choose whether to initialize the hl contract or not
-initLHBuyer
-  :: String
-     -> (Types.Payoff -> OpenGames.Engine.Engine.Payoff)
-     -> OpenGame
-          StochasticStatefulOptic
-          StochasticStatefulContext
-          '[Kleisli
-              Stochastic
-              (Transaction, HLContract, GasPrice)
-              (InitialDecisionBuyer HLContract)]
-          '[[DiagnosticInfoBayesian
-               (Transaction, HLContract, GasPrice)
-               (InitialDecisionBuyer HLContract)]]
-          (Transaction, HLContract, GasPrice)
-          ()
-          (Either Transaction (Transaction, HLContract, GasPrice))
-          ()
 initLHBuyer buyerName utilityFunctionBuyer = [opengame|
 
    inputs    : tx,contract,piInit ;

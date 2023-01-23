@@ -56,7 +56,8 @@ data Transaction = Transaction
   } deriving (Eq,Ord,Show)
 
 -- 3. Payoff types
-type Payoff = Double
+type PayoffHL = Double
+type UtilityFunction = (PayoffHL -> OpenGames.Engine.Engine.Payoff)
 
 -- 4. Interface type
 data Parameters = Parameters
@@ -67,7 +68,9 @@ data Parameters = Parameters
   , transaction :: Transaction
   , contract :: HLContract
   , piInitial :: GasPrice
-  } deriving (Eq,Show)
+  , utilityFunctionBuyer :: UtilityFunction
+  , utilityFunctionSeller :: UtilityFunction
+  }
 
 -- 5. strategies
 -- | Define general strategy type for constructing the relevant subgame strategies

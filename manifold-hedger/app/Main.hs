@@ -7,7 +7,7 @@ import Parameterization
 main :: IO ()
 main = do
   let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-  putStrLn "\n COMPLTE GAME"
+  putStrLn "\n COMPLETE GAME"
   printOutputCompleteGame strategyComplete parameters
   putStrLn "\n ACCEPT SUBGAME"
   printOutputAcceptSubgame strategyAccept parameters
