@@ -107,7 +107,11 @@ In the Hedger Ledger paper, players are considered to be risk-averse or at best 
  - A risk-averse **Seller** seeks protection against the possibility of prices falling, resulting in less profit.
 So, for both players it makes sense to agree on a fixed gas price beforehand.
 
-To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result to the standard risk-neutral case.
+To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. 
+
+They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result to the standard risk-neutral case.
+
+Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrizations.hs`
 
 ## Code structure
 
