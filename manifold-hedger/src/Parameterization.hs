@@ -42,11 +42,11 @@ testContract = HLContract
    10
    20
    1
+   2
    5
    2
 
 testTransaction = Transaction
-  2
   10
   50
 

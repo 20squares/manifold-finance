@@ -43,6 +43,7 @@ data HLContract = HLContract
   { collateral    :: Collateral
   , payment       :: Payment
   , epsilon       :: Payment
+  , gasInitiation :: Gas
   , gasAccept     :: Gas
   , gasDone       :: Gas
   } deriving (Eq,Show,Ord)
@@ -50,8 +51,7 @@ data HLContract = HLContract
 -- | Transaction that the buyer wants to get implemented
 -- TODO: we assume that gasAllocTX are known at the beginning here
 data Transaction = Transaction
-  { gasInitiation :: Gas
-  , gasAllocTX    :: Gas
+  { gasAllocTX    :: Gas
   , utilityFromTX :: Utility
   } deriving (Eq,Ord,Show)
 
