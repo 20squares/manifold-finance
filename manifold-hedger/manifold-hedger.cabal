@@ -26,8 +26,11 @@ source-repository head
 library
   exposed-modules:
       ActionSpaces
+      Analytics
       Components
+      Diagnostics
       Model
+      Parameterization
       Payoffs
       Types
   other-modules:

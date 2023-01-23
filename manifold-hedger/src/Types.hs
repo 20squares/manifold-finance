@@ -1,8 +1,11 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE RecordWildCards #-}
 
-module Types where
+module Types
+  where
 
+import OpenGames.Engine.Engine
 
 -- 1. Action types
 
@@ -54,4 +57,80 @@ data Transaction = Transaction
 
 -- 3. Payoff types
 type Payoff = Double
+
+-- 4. Interface type
+data Parameters = Parameters
+  { buyerName :: String
+  , sellerName :: String
+  , distribution :: Stochastic Gas
+  , actionSpaceGasPub :: [Gas]
+  , transaction :: Transaction
+  , contract :: HLContract
+  , piInitial :: GasPrice
+  } deriving (Eq,Show)
+
+-- 5. strategies
+-- | Define general strategy type for constructing the relevant subgame strategies
+-- Should avoid accidental misspecifications
+data Strategy a = Strategy
+  { initiateStrategyBuyer  :: Kleisli
+                                Stochastic
+                                (Transaction, HLContract, GasPrice)
+                                (InitialDecisionBuyer HLContract)
+
+  , noLHPublishStrategy    :: Kleisli
+                                Stochastic
+                                (Transaction, GasPrice)
+                                (PublishDecision Double)
+  , acceptStrategy         :: Kleisli
+                                Stochastic
+                                (Transaction, HLContract, GasPrice)
+                                AcceptDecisionSeller
+  , recoupStrategy         :: Kleisli
+                                Stochastic
+                                (Transaction, HLContract, GasPrice)
+                                RecoupDecisionBuyer
+  , lhPublishStrategyPart1 :: Kleisli
+                                Stochastic
+                                GasPrice
+                                (PublishDecision Double)
+  , lhPublishStrategyPart2 :: Kleisli
+                                Stochastic
+                                (GasPrice, Transaction, PublishDecision a)
+                                (PublishDecision Gas)
+  , fulfillStrategy        :: Kleisli
+                                Stochastic
+                                (Transaction, HLContract, GasPrice, Gas)
+                                FulfillDecisionSeller
+  , noFulfillStrategy      :: Kleisli
+                                Stochastic
+                                (Transaction, HLContract, GasPrice)
+                                FulfillDecisionSeller
+  } 
+
+-- Complete strategy description as tuple for each relevant subgame
+completeStrategy Strategy{..} =
+  ( initiateStrategyBuyer
+    ::- noLHPublishStrategy
+    ::- acceptStrategy
+    ::- recoupStrategy
+    ::- lhPublishStrategyPart1
+    ::- lhPublishStrategyPart2
+    ::- fulfillStrategy
+    ::- noFulfillStrategy
+    ::- Nil
+  , acceptStrategy
+    ::- recoupStrategy
+    ::- lhPublishStrategyPart1
+    ::- lhPublishStrategyPart2
+    ::- fulfillStrategy
+    ::- noFulfillStrategy
+    ::- Nil
+  , lhPublishStrategyPart1
+    ::- lhPublishStrategyPart2
+    ::- fulfillStrategy
+    ::- noFulfillStrategy
+    ::- Nil
+  )
+
 

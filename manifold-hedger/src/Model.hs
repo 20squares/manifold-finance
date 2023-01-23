@@ -53,11 +53,11 @@ publishSubgame buyerName sellerName distribution possibleGasPubLS utilityFunctio
 -- | Initiate ~> Accepted subgame
 acceptSubgame buyerName sellerName distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx, contract,piInit ;
+   inputs    : tx, contract,piInitial ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx, contract,piInit ;
+   inputs    : tx, contract,piInitial ;
    feedback  : ;
    operation : acceptLHSeller sellerName utilityFunctionSeller;
    outputs   : acceptanceDecisionGame ;
@@ -81,11 +81,11 @@ acceptSubgame buyerName sellerName distribution possibleGasPubLS utilityFunction
 -- | Complete game
 completeGame buyerName sellerName distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx,contract,piInit ;
+   inputs    : tx,contract,piInitial ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx,contract,piInit ;
+   inputs    : tx,contract,piInitial ;
    feedback  : ;
    operation : initLHBuyer buyerName utilityFunctionBuyer;
    outputs   : contractDecisionGame ;
