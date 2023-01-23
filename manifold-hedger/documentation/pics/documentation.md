@@ -71,8 +71,7 @@ In formalizing Hedger Ledger, we had to make explicit some assumptions that were
 First of all, the payoffs had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. Indeed, in our model transaction is defined as a record of type:
 ``` haskell
 data Transaction = Transaction
-{ gasInitiation :: Gas
-, gasAllocTX    :: Gas
+{ gasAllocTX    :: Gas
 , utilityFromTX :: Utility
 } deriving (Eq,Ord,Show)
 ```
@@ -86,6 +85,7 @@ data HLContract = HLContract
 { collateral    :: Collateral
 , payment       :: Payment
 , epsilon       :: Payment
+, gasInitiation :: Gas
 , gasAccept     :: Gas
 , gasDone       :: Gas
 } deriving (Eq,Show,Ord)
@@ -223,14 +223,16 @@ The upside of assuming this little amount of overhead is that switching from pur
 
 The model is composed of several files:
 
+- `app/Main.hs` contains all the main ingredients already set up for a run. Executing it will execute equilibrium checking on some of the most interesting strategies we defined. We suggest to start from here to get a feel of how the model analysis works.
 - `Model.hs` is the file where the main model is defined.
 - `Components.hs` is where the subgames making up the whole model are defined.
 - `Payoffs.hs` is where the payoff functions used in every subgame are defined. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
+- `Strategies.hs` is where the strategies we want to test are defined.
+- `Parametrization.hs` defines the concrete parametrizations used for the analysis: e.g. intrinsic utility of **Buyer**'s transaction, fixed costs for initiating a Hedger Ledger contract etc.
 - `Types.hs` is where we define the types of the decisions to be taken (e.g. $Wait$ or $Initiate$ a Hedger Ledger contract) and the types of `HLContract` and `Transaction`. Here we also define the types for payoffs, gas etc. These are all aliased to `Double`.
 - `ActionSpaces.hs` is mainly needed for technical type-transformations. It maps a player's decision type into the type needed to be fed in the subsequent game.
-- `Analytics.hs` defines the strategies we want to test.
+- `Analytics.hs` defines the equilibrium notion for each game we want to test.
 - `Diagnostics.hs` is the file detailing which and how much information we want to show when strategies are tested.
-
 
 Relying on the DSL Primer, parsing the code structure should be a manageable task.
 
