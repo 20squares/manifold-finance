@@ -111,7 +111,7 @@ To model this assumption explicitly, we relied on [Expected Utility Theory](http
 
 They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result to the standard risk-neutral case.
 
-Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrizations.hs`
+Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`
 
 ## Code structure
 
