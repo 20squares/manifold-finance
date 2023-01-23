@@ -8,7 +8,7 @@ import Types
 -- | PayoffHL for initiating the contract
 initialPayoffBuyer :: Transaction -> InitialDecisionBuyer HLContract -> GasPrice -> PayoffHL
 initialPayoffBuyer _ Wait _ = 0
-initialPayoffBuyer Transaction{..} (Initiate HLContract{..}) price = - (gasInitiation * price ) - payment - epsilon 
+initialPayoffBuyer Transaction{..} (Initiate HLContract{..}) price = (- (gasInitiation * price )) - payment - epsilon 
 
 -- | PayoffHL for buyer when no initialized contract
 noLHPayoffBuyer :: Transaction -> GasPrice -> (PublishDecision Gas) -> PayoffHL
@@ -24,7 +24,7 @@ recoupLHPayoffSeller = noLHPayoffSeller
 
 -- | PayoffHL for seller when accepting the hl contract
 acceptLHPayoffSeller :: HLContract -> GasPrice -> PayoffHL
-acceptLHPayoffSeller HLContract{..} price = - (gasAccept * price) - collateral
+acceptLHPayoffSeller HLContract{..} price = (-1.0) * ((gasAccept * price) + collateral)
 
 -- | PayoffHL for buyer when recouping the hl contract
 recoupLHPayoffBuyer :: Transaction -> HLContract -> GasPrice ->  RecoupDecisionBuyer ->  PayoffHL

@@ -11,7 +11,8 @@ import Analytics
 import Diagnostics
 import Model
 import Payoffs
-import Types 
+import Strategies
+import Types
 
 import Numeric.Probability.Distribution (normal)
 
@@ -39,22 +40,22 @@ testStrategyTupleTarget = completeStrategy testStrategy
 -- 2. Contract Parameters used
 
 testContract = HLContract
-   10
-   20
+   (10**9)
+   100
    1
-   2
-   5
-   2
+   (0.1*10**9)
+   (75*10**3)
+   (20*10**3)
 
 testTransaction = Transaction
-  10
-  50
+  (5 * 10**6)
+  (10**9)
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
-testDistribution = normal [0.25,0.5..5.0]
+testDistribution = normal [0..200]
 
-testActionSpaceGasPub = [6.0,8.0,10.0,12.0,14.0]
+testActionSpaceGasPub = [0,(5 * 10**6)]
 
 
 --------------------------
@@ -71,6 +72,6 @@ parameters = Parameters
   testActionSpaceGasPub
   testTransaction
   testContract
-  3
-  squareRootUtility
-  squareRootUtility
+  100
+  id
+  id
