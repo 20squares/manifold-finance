@@ -143,7 +143,7 @@ We can imagine this block as a box with 4 wires on its outside, on which travels
 - `input`, data that gets fed to the game (e.g. a player receiving information from a context).
 - `outputs`, data that the game feeds to the outside world (e.g. a player communicating a choice to another player).
 - `returns`, the returns of a player actions, which are usually directly fed to a function calculating payoffs.
-- The `feedback` wire is rarely used in practice. For details about its usage please refer to the [relevant literature](https://arxiv.org/abs/1603.04641).
+- The `feedback` wire is rarely used in practice. For details about its usage please refer to the relevant [literature](https://arxiv.org/abs/1603.04641).
 
 The `:--:` delimiters separate the outside from the inside of the box. As we see, the interfaces inside are replicated. This allows for a notion of nesting. For instance, the situation depicted in the following picture:
 
