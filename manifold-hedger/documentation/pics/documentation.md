@@ -185,17 +185,17 @@ Moreover, we provide some *basic operations* to populate a box, namely:
 - A *function*, which just transforms the input in some output.
 - A *stochastic distribution*, used to implement draws from nature.
 - A *strategic choice*, which can be thought of as a function parametrized over strategies.
-- A *addPayoffs* internal operation: Since in our software everything is a game, we need to keep track of who-is-who. Namely, there may be different subgames in our model that are played by the same player. In this situation, the payoffs of these subgames must be combined. *addPayoffs* does exactly this for of bookkeeping.
+- A *addPayoffs* internal operation: Since in our software everything is a game, we need to keep track of who-is-who. Namely, there may be different subgames in our model that are played by the same player. In this situation, the payoffs of these subgames must be combined. *addPayoffs* does exactly this form of bookkeeping.
 
 #### Supplying strategies
 
 *Strategies* are supplied as tuples, once for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`.
 
 #### Branching
-Another important operation we provide is called *branching*. This is useful in context where, say, a player choice determines which subgame is going to be played next.
-Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice of some other game, this allows for flexible modelling of complex situations.
+Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
+Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice in some other game, this allows for flexible modelling of complex situations.
 
-Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are very complicated to draw, this depiction is rarely used.
+Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used.
 
 #### Stochasticity
 Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
@@ -203,7 +203,7 @@ Our models are Bayesian by default, meaning that they allow for reasoning in pro
 Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
 
 A consequence of this is that deterministic strategic decisions (e.g. 'player chooses option A') must be lifted into the stochastic monad, getting thus transformed into their probabilistic equivalent (e.g. 'of all the option available, player chooses A with probability 1')
-g
+
 A practical example of this can be found in `Analytics.hs`, where we have:
 
 ```haskell
@@ -215,7 +215,7 @@ acceptStrategy
 acceptStrategy = pureAction Accept
 ```
 
-`pureAction` lifts the deterministic choice `Accept` to the probabilistic concept.
+`pureAction` lifts the deterministic choice `Accept` to the corresponding concept in the probabilistic realm.
 
 The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
