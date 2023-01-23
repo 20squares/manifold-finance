@@ -203,10 +203,10 @@ Our models are Bayesian by default, meaning that they allow for reasoning in pro
 Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
 
 A consequence of this is that deterministic strategic decisions (e.g. 'player chooses option A') must be lifted into the stochastic monad, getting thus transformed into their probabilistic equivalent (e.g. 'of all the option available, player chooses A with probability 1')
-
+g
 A practical example of this can be found in `Analytics.hs`, where we have:
 
-```
+```haskell
 acceptStrategy
   :: Kleisli
        Stochastic
