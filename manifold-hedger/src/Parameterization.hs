@@ -68,6 +68,8 @@ squareRootUtility x = sqrt x
 parameters = Parameters
   "buyer"
   "seller"
+  (10**9)
+  (10**9)
   testDistribution
   testActionSpaceGasPub
   testTransaction

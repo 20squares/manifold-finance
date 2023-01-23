@@ -19,7 +19,7 @@ Defines the main analytics for the model
 ------------------------
 -- 1. Equilibrium notion
 -- | Equilibrium definition for complete game
-equilibriumCompleteGame strategy Parameters{..} = evaluate (completeGame buyerName sellerName distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
+equilibriumCompleteGame strategy Parameters{..} = evaluate (completeGame buyerName sellerName buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
   where
     context =
       StochasticStatefulContext
@@ -46,7 +46,7 @@ printOutputCompleteGame strategy parameters = do
   putStrLn $ checkEqMaybe3L seller8
 
 -- | Equilibrium definition for accept subgame
-equilibriumAcceptSubGame strategy Parameters{..} = evaluate (acceptSubgame buyerName sellerName distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
+equilibriumAcceptSubGame strategy Parameters{..} = evaluate (acceptSubgame buyerName sellerName buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
   where
     context =
       StochasticStatefulContext
@@ -70,7 +70,7 @@ printOutputAcceptSubgame strategy parameters = do
 
 
 -- | Equilibrium definition for publish subgame
-equilibriumPublishSubGame strategy Parameters{..} = evaluate (publishSubgame buyerName sellerName distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
+equilibriumPublishSubGame strategy Parameters{..} = evaluate (publishSubgame buyerName sellerName buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
   where
     context =
       StochasticStatefulContext

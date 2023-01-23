@@ -50,7 +50,25 @@ gasPriceDistribution distribution = [opengame|
 -- 1.2. Buyer
 -- | Buyer initial decision
 -- Given the transaction that the player wants to implement, a given hl contract, and a current gas price choose whether to initialize the hl contract or not
-initLHBuyer buyerName utilityFunctionBuyer = [opengame|
+initLHBuyer
+  :: String
+     -> Wealth
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli
+              Stochastic
+              (Transaction, HLContract, GasPrice)
+              (InitialDecisionBuyer HLContract)]
+          '[[DiagnosticInfoBayesian
+               (Transaction, HLContract, GasPrice)
+               (InitialDecisionBuyer HLContract)]]
+          (Transaction, HLContract, GasPrice)
+          ()
+          (Either Transaction (Transaction, HLContract, GasPrice))
+          ()
+initLHBuyer buyerName wealthBuyer utilityFunctionBuyer = [opengame|
 
    inputs    : tx,contract,piInit ;
    feedback  : ;
@@ -60,7 +78,7 @@ initLHBuyer buyerName utilityFunctionBuyer = [opengame|
    feedback  : ;
    operation : dependentDecision buyerName $ actionSpaceInitLHBuyer;
    outputs   : contractDecision ;
-   returns   : utilityFunctionBuyer $ initialPayoffBuyer tx contractDecision piInit ;
+   returns   : utilityFunctionBuyer $ initialPayoffBuyer wealthBuyer tx contractDecision piInit ;
 
    inputs    : contractDecision, tx, piInit ;
    feedback  : ;
@@ -76,7 +94,24 @@ initLHBuyer buyerName utilityFunctionBuyer = [opengame|
   |]
 
 -- | Buyer decision whether no LH
-noLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = [opengame|
+noLHBuyer
+  :: String
+     -> String
+     -> Wealth
+     -> Wealth
+     -> (PayoffHL -> Payoff)
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli Stochastic (Transaction, GasPrice) (PublishDecision Gas)]
+          '[[DiagnosticInfoBayesian
+               (Transaction, GasPrice) (PublishDecision Gas)]]
+          (Transaction, GasPrice)
+          ()
+          ()
+          ()
+noLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
    inputs    : tx, pi ;
    feedback  : ;
@@ -87,11 +122,11 @@ noLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = [ope
    operation : dependentDecision buyerName (const [NoOp, Publish 0]);
    // NOTE ignore the gasPub variable 
    outputs   : publishDecision ;
-   returns   : utilityFunctionBuyer $ noLHPayoffBuyer tx pi publishDecision ;
+   returns   : utilityFunctionBuyer $ noLHPayoffBuyer wealthBuyer tx pi publishDecision ;
 
    inputs    : tx, pi ;
    feedback  : ;
-   operation : forwardFunction $ utilitySeller ;
+   operation : forwardFunction $ utilitySeller  ;
    outputs   : payoffSeller ;
    returns   : ;
    // Compute payoffs for seller
@@ -109,10 +144,28 @@ noLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = [ope
    returns   : ;
   |]
  where
-   utilitySeller x = utilityFunctionSeller $ (uncurry noLHPayoffSeller) x
+   utilitySeller x = utilityFunctionSeller $ (uncurry $ noLHPayoffSeller wealthSeller) x
  
 -- | Buyer decision whether no LH with random sample
-noLHBuyerRandom buyerName sellerName distribution utilityFunctionBuyer utilityFunctionSeller= [opengame|
+noLHBuyerRandom
+  :: String
+     -> String
+     -> Wealth
+     -> Wealth
+     -> Stochastic GasPrice
+     -> (PayoffHL -> Payoff)
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli Stochastic (Transaction, GasPrice) (PublishDecision Gas)]
+          '[[DiagnosticInfoBayesian
+               (Transaction, GasPrice) (PublishDecision Gas)]]
+          Transaction
+          ()
+          ()
+          ()
+noLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller= [opengame|
 
    inputs    : tx ;
    feedback  : ;
@@ -126,7 +179,7 @@ noLHBuyerRandom buyerName sellerName distribution utilityFunctionBuyer utilityFu
 
    inputs    : tx, pi ;
    feedback  : ;
-   operation : noLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller ;
+   operation : noLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller ;
    outputs   : ;
    returns   : ;
 
@@ -137,7 +190,25 @@ noLHBuyerRandom buyerName sellerName distribution utilityFunctionBuyer utilityFu
   |]
 
 -- | Buyer recoup LH
-recoupLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = [opengame|
+recoupLHBuyer
+  :: String
+     -> String
+     -> Wealth
+     -> Wealth
+     -> (PayoffHL -> Payoff)
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli
+              Stochastic (Transaction, HLContract, GasPrice) RecoupDecisionBuyer]
+          '[[DiagnosticInfoBayesian
+               (Transaction, HLContract, GasPrice) RecoupDecisionBuyer]]
+          (Transaction, HLContract, GasPrice)
+          ()
+          ()
+          ()
+recoupLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
    inputs    : tx, contract, pi;
    feedback  : ;
@@ -147,7 +218,7 @@ recoupLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = 
    feedback  : ;
    operation : dependentDecision buyerName (const [Refund,Forfeit]);
    outputs   : recoupDecision ;
-   returns   : utilityFunctionBuyer $ recoupLHPayoffBuyer tx contract pi recoupDecision ;
+   returns   : utilityFunctionBuyer $ recoupLHPayoffBuyer wealthBuyer tx contract pi recoupDecision ;
    // NOTE we make a shortcut for the buyer's decision to run the tx
 
    inputs    : tx, pi ;
@@ -170,11 +241,30 @@ recoupLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = 
    returns   : ;
   |]
   where
-   utilitySeller x = utilityFunctionSeller $ (uncurry recoupLHPayoffSeller) x
+   utilitySeller x = utilityFunctionSeller $ (uncurry $ recoupLHPayoffSeller wealthSeller) x
 
 
 -- | Buyer recoup LH with random sample
-recoupLHBuyerRandom buyerName sellerName distribution utilityFunctionBuyer utilityFunctionSeller= [opengame|
+recoupLHBuyerRandom
+  :: String
+     -> String
+     -> Wealth
+     -> Wealth
+     -> Stochastic GasPrice
+     -> (PayoffHL -> Payoff)
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli
+              Stochastic (Transaction, HLContract, GasPrice) RecoupDecisionBuyer]
+          '[[DiagnosticInfoBayesian
+               (Transaction, HLContract, GasPrice) RecoupDecisionBuyer]]
+          (Transaction, HLContract)
+          ()
+          ()
+          ()
+recoupLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller= [opengame|
 
    inputs    : tx, contract;
    feedback  : ;
@@ -189,7 +279,7 @@ recoupLHBuyerRandom buyerName sellerName distribution utilityFunctionBuyer utili
 
    inputs    : tx, contract, pi ;
    feedback  : ;
-   operation : recoupLHBuyer buyerName sellerName utilityFunctionBuyer utilityFunctionSeller;
+   operation : recoupLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller;
    outputs   :  ;
    returns   :  ;
 
@@ -203,6 +293,24 @@ recoupLHBuyerRandom buyerName sellerName distribution utilityFunctionBuyer utili
   
 -- | Buyer publish TX
 -- TODO reuse noLHBuyer from above?
+publishLHBuyer
+  :: (Ord a1, Show a2, Show b, Show c, Show a1, Num a1, Eq c,
+      Eq a2) =>
+     String
+     -> [Gas]
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli Stochastic c (PublishDecision a1),
+            Kleisli
+              Stochastic (c, a2, PublishDecision a1) (PublishDecision Gas)]
+          '[[DiagnosticInfoBayesian c (PublishDecision a1)],
+            [DiagnosticInfoBayesian
+               (c, a2, PublishDecision a1) (PublishDecision Gas)]]
+          (a2, b, c)
+          ()
+          (Either (a2, b, c, Gas) (a2, b, c))
+          ()
 publishLHBuyer buyerName possibleGasPubLS= [opengame|
 
    inputs    : tx, contract, pi  ;
@@ -240,6 +348,25 @@ publishLHBuyer buyerName possibleGasPubLS= [opengame|
   
 -- | Buyer publish TX with random sample
 -- TODO reuse noLHBuyer from above?
+publishLHBuyerRandom
+  :: (Ord a1, Show a2, Show b, Show c, Show a1, Num a1, Eq c,
+      Eq a2) =>
+     String
+     -> Stochastic c
+     -> [Gas]
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli Stochastic c (PublishDecision a1),
+            Kleisli
+              Stochastic (c, a2, PublishDecision a1) (PublishDecision Gas)]
+          '[[DiagnosticInfoBayesian c (PublishDecision a1)],
+            [DiagnosticInfoBayesian
+               (c, a2, PublishDecision a1) (PublishDecision Gas)]]
+          (a2, b)
+          ()
+          (Either (a2, b, c, Gas) (a2, b, c))
+          ()
 publishLHBuyerRandom buyerName distribution possibleGasPubLS = [opengame|
 
    inputs    : tx, contract ;
@@ -267,7 +394,21 @@ publishLHBuyerRandom buyerName distribution possibleGasPubLS = [opengame|
 
 -- 1.2. Seller
 -- | Accept LH seller
-acceptLHSeller sellerName utilityFunctionSeller = [opengame|
+acceptLHSeller
+  :: (Show a, Show c, Eq a, Eq c) =>
+     String
+     -> Wealth
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli Stochastic (a, HLContract, c) AcceptDecisionSeller]
+          '[[DiagnosticInfoBayesian (a, HLContract, c) AcceptDecisionSeller]]
+          (a, HLContract, c)
+          ()
+          (Either (a, HLContract) (a, HLContract))
+          ()
+acceptLHSeller sellerName wealthSeller utilityFunctionSeller = [opengame|
 
    inputs    : tx, contract,piInit ;
    feedback  : ;
@@ -277,7 +418,7 @@ acceptLHSeller sellerName utilityFunctionSeller = [opengame|
    feedback  : ;
    operation : dependentDecision sellerName (const [Decline,Accept]);
    outputs   : acceptanceDecision ;
-   returns   : utilityFunctionSeller $ acceptLHPayoffSeller contract pi ;
+   returns   : utilityFunctionSeller $ acceptLHPayoffSeller wealthSeller contract pi ;
 
    inputs    : acceptanceDecision, (tx, contract)  ;
    feedback  : ;
@@ -293,7 +434,27 @@ acceptLHSeller sellerName utilityFunctionSeller = [opengame|
   |]
 
 -- | fulfill LH seller if published
-fulfillLHSellerPublished buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = [opengame|
+fulfillLHSellerPublished
+  :: String
+     -> String
+     -> Wealth
+     -> Wealth
+     -> (PayoffHL -> Payoff)
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli
+              Stochastic
+              (Transaction, HLContract, GasPrice, Gas)
+              FulfillDecisionSeller]
+          '[[DiagnosticInfoBayesian
+               (Transaction, HLContract, GasPrice, Gas) FulfillDecisionSeller]]
+          (Transaction, HLContract, GasPrice, Gas)
+          ()
+          FulfillDecisionSeller
+          ()
+fulfillLHSellerPublished buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
    inputs    : tx,contract,pi,gasPub ;
    feedback  : ;
@@ -303,7 +464,7 @@ fulfillLHSellerPublished buyerName sellerName utilityFunctionBuyer utilityFuncti
    feedback  : ;
    operation : dependentDecision sellerName (const [Confirm, Exhaust, Ignore]);
    outputs   : fulfillDecision ;
-   returns   : utilityFunctionSeller $ fulfillLHPayoffSeller tx contract gasPub pi fulfillDecision ;
+   returns   : utilityFunctionSeller $ fulfillLHPayoffSeller wealthSeller tx contract gasPub pi fulfillDecision ;
 
    inputs    : tx, contract, pi, fulfillDecision ;
    feedback  : ;
@@ -326,11 +487,31 @@ fulfillLHSellerPublished buyerName sellerName utilityFunctionBuyer utilityFuncti
    returns   : ;
   |]
  where
-   utilityBuyer x = utilityFunctionBuyer $ fulfillLHPayoffBuyer x
+   utilityBuyer x = utilityFunctionBuyer $ fulfillLHPayoffBuyer wealthBuyer x
 
   
 -- | fulfill LH seller if no-op
-fulfillLHSellerNoOp buyerName sellerName utilityFunctionBuyer utilityFunctionSeller = [opengame|
+fulfillLHSellerNoOp
+  :: String
+     -> String
+     -> Wealth
+     -> Wealth
+     -> (PayoffHL -> Payoff)
+     -> (PayoffHL -> Payoff)
+     -> OpenGame
+          StochasticStatefulOptic
+          StochasticStatefulContext
+          '[Kleisli
+              Stochastic
+              (Transaction, HLContract, GasPrice)
+              FulfillDecisionSeller]
+          '[[DiagnosticInfoBayesian
+               (Transaction, HLContract, GasPrice) FulfillDecisionSeller]]
+          (Transaction, HLContract, GasPrice)
+          ()
+          FulfillDecisionSeller
+          ()
+fulfillLHSellerNoOp buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
    inputs    : tx, contract, pi ;
    feedback  : ;
@@ -340,7 +521,7 @@ fulfillLHSellerNoOp buyerName sellerName utilityFunctionBuyer utilityFunctionSel
    feedback  : ;
    operation : dependentDecision sellerName (const [Exhaust, Ignore]);
    outputs   : noFulfillDecision ;
-   returns   : utilityFunctionSeller $ noFulfillLHPayoffSeller tx contract pi noFulfillDecision ;
+   returns   : utilityFunctionSeller $ noFulfillLHPayoffSeller wealthSeller tx contract pi noFulfillDecision ;
    // NOTE: we restrict the strategy space - the rest of the game is the same as before
 
    inputs    : tx, contract, pi, noFulfillDecision ;
@@ -364,7 +545,7 @@ fulfillLHSellerNoOp buyerName sellerName utilityFunctionBuyer utilityFunctionSel
    returns   : ;
   |]
  where
-   utilityBuyer x = utilityFunctionBuyer $ fulfillLHPayoffBuyer x
+   utilityBuyer x = utilityFunctionBuyer $ fulfillLHPayoffBuyer wealthBuyer x
 
 
 

@@ -58,11 +58,14 @@ data Transaction = Transaction
 -- 3. Payoff types
 type PayoffHL = Double
 type UtilityFunction = (PayoffHL -> OpenGames.Engine.Engine.Payoff)
+type Wealth = Double
 
 -- 4. Interface type
 data Parameters = Parameters
   { buyerName :: String
   , sellerName :: String
+  , buyerWealth :: Wealth
+  , sellerWealth :: Wealth
   , distribution :: Stochastic Gas
   , actionSpaceGasPub :: [Gas]
   , transaction :: Transaction
