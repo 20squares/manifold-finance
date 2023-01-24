@@ -13,8 +13,8 @@ import Model
 import Payoffs
 import Strategies
 import Types
-
-import Numeric.Probability.Distribution (normal)
+import Numeric.Probability.Distribution (shape)
+import Numeric.Probability.Shape (normalCurve)
 
 {-
 Defines the concrete parameterizations used for the analysis
@@ -53,7 +53,9 @@ testTransaction = Transaction
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
-testDistribution = normal [0..200]
+normalDistribution standardDeviationParameter = shape normal [0..200]
+  where
+   normal = normalCurve 100 (10**(standardDeviationParameter+1))
 
 testActionSpaceGasPub = [0,(5 * 10**6)]
 
@@ -70,7 +72,7 @@ parameters = Parameters
   "seller"
   (10**9)
   (10**9)
-  testDistribution
+  (normalDistribution 3)
   testActionSpaceGasPub
   testTransaction
   testContract
