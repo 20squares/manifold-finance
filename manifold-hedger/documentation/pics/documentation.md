@@ -10,8 +10,30 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 
 
 ## Installation
+To run the model, it is necessary to have `haskell` and `stack` installed on your machine. That being the case, just run 
+```sh
+stack run
+```
+in the main directory, where `stack.yaml` is.
 
+### Installing haskell
+If you dont' have either `haskell` or `stack`, it is necessary to install them. there are many ways to do so; on Linux/macOS systems, we suggest using [ghcup](https://www.haskell.org/ghcup/).
+In a terminal, type:
 
+```sh
+ curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh 
+```
+
+If asked, respond 'yes' (`Y`) to the following questions:
+
+```
+Do you want to install haskell-language-server (HLS)?
+Do you want to enable better integration of stack with GHCup?
+```
+
+Afterwards, `ghcup` may ask you to install some additional packages before continuing with the installation. Follow the advice before continuing. Then, just follow the instructions through the end.
+
+`ghcup` is a very convenient solution in that it installs only in one folder (on Linux systems, `/home/user/.ghcup`). Should you decide to get rid of `haskell` altogether, just delete the folder.
 
 
 ## Recap: The Hedger-Ledger paper
@@ -66,6 +88,8 @@ Let us now describe the subgame space:
 
 In formalizing Hedger Ledger, we had to make explicit some assumptions that were kept implicit in the paper.
 
+
+- PAYOFFS ARE DEFINED WRT FLOWS, AND NOT BY FIRST DEFINING AN OUTCOME SPACE AND THEN DEFINING PAYOFFS ON OUTCOMES
 ### Refined payoffs
 
 First of all, the payoffs had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. Indeed, in our model transaction is defined as a record of type:
