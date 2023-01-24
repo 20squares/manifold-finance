@@ -5,54 +5,70 @@ module Payoffs
 
 import Types
 
--- | PayoffHL for initiating the contract
-initialPayoffBuyer :: Wealth -> Transaction -> InitialDecisionBuyer HLContract -> GasPrice -> PayoffHL
-initialPayoffBuyer wealthBuyer _ Wait _ = wealthBuyer
-initialPayoffBuyer wealthBuyer Transaction{..} (Initiate HLContract{..}) price = wealthBuyer + (- (gasInitiation * price )) - payment - epsilon 
-
 -- | PayoffHL for buyer when no initialized contract
 noLHPayoffBuyer :: Wealth -> Transaction -> GasPrice -> (PublishDecision Gas) -> PayoffHL
 noLHPayoffBuyer wealthBuyer _ _ NoOp = wealthBuyer
-noLHPayoffBuyer wealthBuyer Transaction{..} price (Publish _) = wealthBuyer + utilityFromTX - (gasAllocTX * price)
+noLHPayoffBuyer wealthBuyer Transaction{..} priceNew (Publish _) = wealthBuyer + utilityFromTX - (gasAllocTX * priceNew)
 
 -- | PayoffHL for seller when no initialized contract
 noLHPayoffSeller :: Wealth -> Transaction -> GasPrice -> PayoffHL
-noLHPayoffSeller wealthSeller Transaction{..} price = wealthSeller +  gasAllocTX * price
+noLHPayoffSeller wealthSeller Transaction{..} priceNew = wealthSeller +  gasAllocTX * priceNew
 
 -- | Alias for the recoup case
 recoupLHPayoffSeller = noLHPayoffSeller
 
--- | PayoffHL for seller when accepting the hl contract
-acceptLHPayoffSeller :: Wealth -> HLContract -> GasPrice -> PayoffHL
-acceptLHPayoffSeller wealthSeller HLContract{..} price = wealthSeller + (-1.0) * ((gasAccept * price) + collateral)
-
 -- | PayoffHL for buyer when recouping the hl contract
-recoupLHPayoffBuyer :: Wealth -> Transaction -> HLContract -> GasPrice ->  RecoupDecisionBuyer ->  PayoffHL
-recoupLHPayoffBuyer wealthBuyer Transaction{..} HLContract{..} price Refund  = wealthBuyer + payment + epsilon - price * gasDone 
-recoupLHPayoffBuyer wealthBuyer Transaction{..} HLContract{..} price Forfeit = wealthBuyer + maximum [0,netUtility]
+recoupLHPayoffBuyer :: Wealth -> Transaction -> HLContract -> GasPrice -> GasPrice -> RecoupDecisionBuyer ->  PayoffHL
+recoupLHPayoffBuyer wealthBuyer Transaction{..} HLContract{..} priceNew priceOld decision =
+  case decision of
+    Refund  -> wealthBuyer + payment + epsilon - priceNew * gasDone + costsInitialization
+    Forfeit -> wealthBuyer + maximum [0,netUtility] + costsInitialization
   where
-    netUtility = utilityFromTX - (gasAllocTX * price)
+    netUtility = utilityFromTX - (gasAllocTX * priceNew)
+    costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
 
 
 -- | PayoffHL for seller when fullfilling the contract
-fulfillLHPayoffSeller :: Wealth -> Transaction -> HLContract -> Gas ->  GasPrice -> FulfillDecisionSeller -> PayoffHL
-fulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..} _      price Exhaust = wealthSeller + payment + collateral - (gasDone * price)
-fulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..} _      price Ignore  = wealthSeller + gasAllocTX * price
-fulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..} gasPub price Confirm = wealthSeller + payment + collateral + epsilon - ((gasAllocTX - (gasPub + gasDone))*price)
+-- TODO Check _gasAlloc_
+fulfillLHPayoffSeller :: Wealth -> Transaction -> HLContract -> Gas ->  GasPrice -> GasPrice -> FulfillDecisionSeller -> PayoffHL
+fulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..} gasPub priceNew priceOld decision =
+  case decision of
+    Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
+    Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
+    Confirm -> wealthSeller + payment + collateral + epsilon - ((gasAllocTX - (gasPub + gasDone))*priceNew) + costsAcceptance
+  where
+    costsAcceptance = - ((gasAccept * priceOld) + collateral)
 
 -- | PayoffHL for seller when not fullfilling the contract
-noFulfillLHPayoffSeller :: Wealth -> Transaction -> HLContract  ->  GasPrice -> FulfillDecisionSeller -> PayoffHL
-noFulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..}   price Exhaust = wealthSeller + payment + collateral - (gasDone * price)
-noFulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..}   price Ignore  = wealthSeller + gasAllocTX * price
+-- TODO Check _gasAlloc_
+noFulfillLHPayoffSeller :: Wealth -> Transaction -> HLContract  ->  GasPrice -> GasPrice -> FulfillDecisionSeller -> PayoffHL
+noFulfillLHPayoffSeller wealthSeller Transaction{..} HLContract{..}   priceNew priceOld decision =
+  case decision of
+    Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
+    Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
+  where
+    costsAcceptance = - ((gasAccept * priceOld) + collateral)
 
 -- | PayoffHL for buyer conditional on the fulfillment decision
 -- NOTE we build in the decision to transact when exhaust or ignore decisions by seller are made
-fulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, FulfillDecisionSeller) -> PayoffHL
-fulfillLHPayoffBuyer wealthBuyer ( Transaction{..}, HLContract{..}, price, decision) =
+fulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice,GasPrice,FulfillDecisionSeller) -> PayoffHL
+fulfillLHPayoffBuyer wealthBuyer ( Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
   case decision of
-    Exhaust -> wealthBuyer + maximum [0,netUtility]
-    Ignore  -> wealthBuyer + maximum [0,netUtility]
-    Confirm -> wealthBuyer + utilityFromTX 
+    Exhaust -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+    Ignore  -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+    Confirm -> wealthBuyer + utilityFromTX + costsInitialization
   where
-    netUtility = utilityFromTX - (gasAllocTX * price)
+    netUtility = utilityFromTX - (gasAllocTX * priceNew)
+    costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
+
+-- | PayoffHL for buyer conditional on the fulfillment decision
+-- NOTE we build in the decision to transact when exhaust or ignore decisions by seller are made
+noFulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, FulfillDecisionSeller) -> PayoffHL
+noFulfillLHPayoffBuyer wealthBuyer ( Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
+  case decision of
+    Exhaust -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+    Ignore  -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+  where
+    netUtility = utilityFromTX - (gasAllocTX * priceNew)
+    costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
 

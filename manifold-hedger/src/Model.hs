@@ -25,11 +25,11 @@ We begin "backwards" by considering the last states first
 -- | Initiate ~> Accepted ~> Publish subgame
 publishSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx, contract ;
+   inputs    : tx, contract,piOld ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx, contract ;
+   inputs    : tx, contract,piOld ;
    feedback  : ;
    operation : publishLHBuyerRandom buyerName distribution  possibleGasPubLS;
    outputs   : publishDecisionGame ;
@@ -49,16 +49,18 @@ publishSubgame buyerName sellerName wealthBuyer wealthSeller distribution possib
  where
    publishBranching buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller  = (fulfillLHSellerPublished buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller) +++ (fulfillLHSellerNoOp buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller)
 
+
+ 
 -- | Initiate ~> Accepted subgame
 acceptSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx, contract,piInitial ;
+   inputs    : tx, contract,piOld ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx, contract,piInitial ;
+   inputs    : tx, contract,piOld ;
    feedback  : ;
-   operation : acceptLHSeller sellerName wealthSeller utilityFunctionSeller;
+   operation : acceptLHSeller sellerName ;
    outputs   : acceptanceDecisionGame ;
    returns   :  ;
 
@@ -81,13 +83,13 @@ acceptSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibl
 -- | Complete game
 completeGame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx,contract,piInitial ;
+   inputs    : tx,contract,piOld ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx,contract,piInitial ;
+   inputs    : tx,contract,piOld ;
    feedback  : ;
-   operation : initLHBuyer buyerName wealthBuyer utilityFunctionBuyer;
+   operation : initLHBuyer buyerName ;
    outputs   : contractDecisionGame ;
    returns   :  ;
 
@@ -104,6 +106,4 @@ completeGame buyerName sellerName wealthBuyer wealthSeller distribution possible
   |]
   where
     completeBranching buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller = (noLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (acceptSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
-
-
 

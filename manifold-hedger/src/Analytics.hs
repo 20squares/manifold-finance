@@ -74,7 +74,7 @@ equilibriumPublishSubGame strategy Parameters{..} = evaluate (publishSubgame buy
   where
     context =
       StochasticStatefulContext
-         (pure ((),(transaction,contract))) (\_ _ -> pure ())
+         (pure ((),(transaction,contract,piInitial))) (\_ _ -> pure ())
 
 
 -- | Hand-rolling the specific output type for publish subgame

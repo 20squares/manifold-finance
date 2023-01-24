@@ -94,7 +94,7 @@ data Strategy a = Strategy
                                 AcceptDecisionSeller
   , recoupStrategy         :: Kleisli
                                 Stochastic
-                                (Transaction, HLContract, GasPrice)
+                                (Transaction, HLContract, GasPrice, GasPrice)
                                 RecoupDecisionBuyer
   , lhPublishStrategyPart1 :: Kleisli
                                 Stochastic
@@ -106,11 +106,11 @@ data Strategy a = Strategy
                                 (PublishDecision Gas)
   , fulfillStrategy        :: Kleisli
                                 Stochastic
-                                (Transaction, HLContract, GasPrice, Gas)
+                                (Transaction, HLContract, GasPrice, GasPrice, Gas)
                                 FulfillDecisionSeller
   , noFulfillStrategy      :: Kleisli
                                 Stochastic
-                                (Transaction, HLContract, GasPrice)
+                                (Transaction, HLContract, GasPrice, GasPrice)
                                 FulfillDecisionSeller
   } 
 
