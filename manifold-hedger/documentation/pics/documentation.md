@@ -1,22 +1,79 @@
-# manifold-hedger
+# Table of contents
+- [Summary](#summary)
+    - [Analytics results](#analytics-results)
+- [Installation](#installation)
+    - [Normal execution](#normal-execution)
+    - [Interactive execution](#interactive-execution)
+    - [Addendum: Installing haskell](#addendum-installing-haskell)
+- [Explaining the model](#explaining-the-model)
+    - [Recap: The Ledger-Hedger paper](#recap-the-Ledger-Hedger-paper)
+    - [Assumptions made explicit](#assumptions-made-explicit)
+        - [Refined payoffs](#refined-payoffs)
+        - [Service costs](#service-costs)
+        - [Modelling risk explicitly](#modelling-risk-explicitly)
+- [Code deep dive](#code-deep-dive)
+    - [Recap: DSL primer](#recap-dsl-primer)
+        - [The building blocks](#the-building-blocks)
+        - [Basic operations](#basic-operations)
+        - [Supplying strategies](#supplying-strategies)
+        - [Branching](#branching)
+        - [Stochasticity](#stochasticity)
+    - [File structure](#file-structure)
 
-## Summary
+
+# Summary
 This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular the seller). Our model allows for custom definitions of risk-sensitivity for all players.
 
-### Analytics results
+## Analytics results
 
 
 
 
 
-## Installation
-To run the model, it is necessary to have `haskell` and `stack` installed on your machine. That being the case, just run 
+
+
+# Installation
+
+To run the model, it is necessary to have `haskell` and `stack` installed on your machine. Refer to the relevant [subsection](#addendum-installing-haskell) for instructions.
+
+## Normal execution
+
+To test the model, just run 
 ```sh
 stack run
 ```
-in the main directory, where `stack.yaml` is.
+in the main directory, where the file `stack.yaml` is.
+The model will be compiled and a predefined set of analytics will be run.
 
-### Installing haskell
+## Interactive execution
+
+One of the most powerful features of `haskell` is *interactive mode*. This allows you to recompile the code on the fly, querying the type of a function and a lot of other things. To start interactive mode, just run
+
+```sh
+stack ghci
+```
+
+in the main directory.
+
+| Command | Description |
+|:--------|---------------------------:|
+| `:q`      | quit interactive mode       |
+| `:r`     | recompile the source code   |
+| `:l module` | load module |
+| `:t expression` | query expression type |
+
+Of these commands, `:t` is the most useful one, as it allows to see clearly what type of input we must fed to a function. For instance, `:t id` produces the output:
+
+```haskell
+id :: a -> a
+```
+
+As games are nothing more than functions under the hood, this allows us to see the game type by doing 
+`:t gameName`. If the game is parametrized, say, over a string, then `:t gameName "string"` will return the type where the first component has already been fed.
+
+This tool is expecially powerful to better understand the type of the strategy we have to feed to the game.
+
+## Addendum: Installing haskell
 If you dont' have either `haskell` or `stack`, it is necessary to install them. there are many ways to do so; on Linux/macOS systems, we suggest using [ghcup](https://www.haskell.org/ghcup/).
 In a terminal, type:
 
@@ -36,19 +93,22 @@ Afterwards, `ghcup` may ask you to install some additional packages before conti
 `ghcup` is a very convenient solution in that it installs only in one folder (on Linux systems, `/home/user/.ghcup`). Should you decide to get rid of `haskell` altogether, just delete the folder.
 
 
-## Recap: The Hedger-Ledger paper
+# Explaining the model
+TODO TODO TODO
+
+## Recap: The Ledger-Hedger paper
 As our model is based on the Ledger-Hedger paper, we start by briefly recalling the main highlights of this work.
 
-[Ledger Hedger](https://eprint.iacr.org/2022/056.pdf) is a game-theoretic mechanism for gas price reservation. *Gas size* denotes the amount of computational work needed to execute a given function in a smart contract. For instance, in the Ethereum ecosystem every EVM instruction has a fixed gas size. As the blockspace demand varies overtime, transaction issuers dinamically specify the fees they are willing to pay to get their transactions included by providing a *gas price*: The total amount the issuer will pay to the miner (or whatever equivalent role a given blockchain provides) for a given transaction to be executed is then determined as the product between gas size and gas price.
+[Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) is a game-theoretic mechanism for gas price reservation. *Gas size* denotes the amount of computational work needed to execute a given function in a smart contract. For instance, in the Ethereum ecosystem every EVM instruction has a fixed gas size. As the blockspace demand varies overtime, transaction issuers dinamically specify the fees they are willing to pay to get their transactions included by providing a *gas price*: The total amount the issuer will pay to the miner (or whatever equivalent role a given blockchain provides) for a given transaction to be executed is then determined as the product between gas size and gas price.
 
-The fact that gas price varies with market conditions, generally rising when demand is high and falling when it's not, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, it can be a problem for miners, that may be unable to forecast their future profits. Ledger Hedger provides a mechanism to address this problem. We consider a system with two participants:
+The fact that gas price varies with market conditions, generally rising when demand is high and falling when it's not, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, it can be a problem for miners, that may be unable to forecast their future profits. Ledger-Hedger provides a mechanism to address this problem. We consider a system with two participants:
 
 - **Buyer**, that wants to issue a given transaction in a future block interval $start<end$. The transaction's gas size, which from now on we will call $g_{alloc}$ to keep consistent with the paper, is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
 
 This mechanism defines an interactive games articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
 
-![Hedger-Ledger statespace](game_statespace.png)
+![Ledger-Hedger statespace](game_statespace.png)
 
 Let us give a more detailed view of all the moving components in this picture.
 
@@ -56,7 +116,7 @@ Let us give a more detailed view of all the moving components in this picture.
 - Phase II happens within the block interval $start<end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
 
 Let us now describe the subgame space:
-- **InitLH** is where **Buyer** can decide to either use or not use Hedger Leger. 
+- **InitLH** is where **Buyer** can decide to either use or not use Leger-Hedger.
     - In the former case ($Wait$), **Buyer** just has to wait until $start$;
     - In the latter case ($Initiate$), buyer initiates the mechanism by:
         -paying an amount $SentTokens$;
@@ -72,7 +132,7 @@ Let us now describe the subgame space:
     - In the latter case ($Accept$), **Seller** commits the collateral $col$.
 - **Nature draws** is when Phase II starts, and the market gas price $\pi_{exec}$ becomes known. This may be higher or lower than $\pi_{contract}$.
 
-- **NoLH** is the subgame resulting from **Buyer** not having used Ledger Hedger. Here **Buyer** can decide to either publish the transaction anyway ($Publish$), which gets confirmed at market price, or to not publish the transaction ($No-op$).
+- **NoLH** is the subgame resulting from **Buyer** not having used Ledger-Hedger. Here **Buyer** can decide to either publish the transaction anyway ($Publish$), which gets confirmed at market price, or to not publish the transaction ($No-op$).
 - **RecoupLH** is the subgame where **Buyer**'s proposition was not accepted. **Buyer** can either:
     - Choose to Recoup their funds ($Recoup$), in which case **Buyer** receives back the amount $SentTokens$ in full
     - Choose to not recoup the funds ($Forfait$), in which case the amount $SentTokens$ is lost.
@@ -86,7 +146,7 @@ Let us now describe the subgame space:
 
 ## Assumptions made explicit
 
-In formalizing Hedger Ledger, we had to make explicit some assumptions that were kept implicit in the paper.
+In formalizing Ledger-Hedger, we had to make explicit some assumptions that were kept implicit in the paper.
 
 
 - PAYOFFS ARE DEFINED WRT FLOWS, AND NOT BY FIRST DEFINING AN OUTCOME SPACE AND THEN DEFINING PAYOFFS ON OUTCOMES
@@ -102,7 +162,7 @@ data Transaction = Transaction
 here, `utilityFromTX` is the *intrinsic utility* of the transaction.
 
 ### Service costs
-In the paper, actions such as **Initiate** or **Accept** have a cost, which is expressed in gas units. This makes sense as the paper is aimed at providing an on-chain gas price reservation mechanism. We incorporated these costs in the Hedger Ledger contract type, defined as the following record:
+In the paper, actions such as **Initiate** or **Accept** have a cost, which is expressed in gas units. This makes sense as the paper is aimed at providing an on-chain gas price reservation mechanism. We incorporated these costs in the Ledger-Hedger contract type, defined as the following record:
 
 ``` haskell
 data HLContract = HLContract
@@ -115,7 +175,7 @@ data HLContract = HLContract
 } deriving (Eq,Show,Ord)
 ```
 
-Here, `gasInitiation` represents the fee **Buyer** has to pay to initiate an Hedger Ledger contract,`gasAccept` is what **Seller** has to pay to accept it, and `gasDone` represent the fee **Seller** has to pay to finally fullfill the contract. 
+Here, `gasInitiation` represents the fee **Buyer** has to pay to initiate an Ledger-Hedger contract,`gasAccept` is what **Seller** has to pay to accept it, and `gasDone` represent the fee **Seller** has to pay to finally fullfill the contract. 
 
 We stuck to the nomenclature used in the paper to aid comprehension, but since the type `Gas` is just an alias for `Double`, our model is not necessarily bound to the on-chain interpretation.
 
@@ -126,7 +186,7 @@ Perhaps the most important assumption we made explicit is around the notion of r
 
 In a nutshell, *risk propensity* denotes how much one prefers a certain payoff versus an uncertain one. To give a simple example, let us imagine a lottery where one can win between 0 and 100 dollars randomly. The expected payoff in this scenario is 50 dollars. A *risk-averse* player will prefer to receive 50 dollars with certainty than playing the lottery. On the contrary, a *risk-loving* player will prefer to play the lottery: the hope for a higher payoff wins over the possibility of getting a lower one. A *risk-neutral* player will be unbiased with respect to which game to play.
 
-In the Hedger Ledger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger Hedger is exactly hedging against the uncertainty of future gas price fluctuations: 
+In the Ledger-Hedger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger-Hedger is exactly hedging against the uncertainty of future gas price fluctuations: 
  - A risk-averse **Buyer** seeks protection against the possibility of prices rising, resulting in bigger expenses;
  - A risk-averse **Seller** seeks protection against the possibility of prices falling, resulting in less profit.
 So, for both players it makes sense to agree on a fixed gas price beforehand.
@@ -137,13 +197,13 @@ They represent the risk propensity of both **Buyer** and **Seller**. A concave f
 
 Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`
 
-## Code structure
+# Code deep dive
 
-### Recap: DSL primer
+## Recap: DSL primer
 
-Our models are written in a DSL compiled to `Haskell`. 
+Our models are written in a DSL compiled to `haskell`. 
 
-#### The building blocks
+### The building blocks
 The basic building block of our model is called **open game**, and can be thought of as a game-theoretic lego brick. This may represent a player, a nature draw, a payoff matrix or a complex combination of these elements. It has the following form:
 
 ```haskell
@@ -207,7 +267,7 @@ gameName variables = [opengame|
 
 In turn, `Subgame1` and `Subgame2` can be other games defined using the same DSL. Notice that the wire `x` is internal and totally hidden from the 'outside world'. 
 
-#### Basic operations
+### Basic operations
 
 Moreover, we provide some *basic operations* to populate a box, namely:
 - A *function*, which just transforms the input in some output.
@@ -215,17 +275,17 @@ Moreover, we provide some *basic operations* to populate a box, namely:
 - A *strategic choice*, which can be thought of as a function parametrized over strategies.
 - A *addPayoffs* internal operation: Since in our software everything is a game, we need to keep track of who-is-who. Namely, there may be different subgames in our model that are played by the same player. In this situation, the payoffs of these subgames must be combined. *addPayoffs* does exactly this form of bookkeeping.
 
-#### Supplying strategies
+### Supplying strategies
 
 *Strategies* are supplied as tuples, once for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`.
 
-#### Branching
+### Branching
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
 Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice in some other game, this allows for flexible modelling of complex situations.
 
 Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used.
 
-#### Stochasticity
+### Stochasticity
 Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
 
 Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
@@ -247,7 +307,7 @@ acceptStrategy = pureAction Accept
 
 The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
-### File structure
+## File structure
 
 The model is composed of several files:
 
@@ -256,8 +316,8 @@ The model is composed of several files:
 - `Components.hs` is where the subgames making up the whole model are defined.
 - `Payoffs.hs` is where the payoff functions used in every subgame are defined. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
 - `Strategies.hs` is where the strategies we want to test are defined.
-- `Parametrization.hs` defines the concrete parametrizations used for the analysis: e.g. intrinsic utility of **Buyer**'s transaction, fixed costs for initiating a Hedger Ledger contract etc.
-- `Types.hs` is where we define the types of the decisions to be taken (e.g. $Wait$ or $Initiate$ a Hedger Ledger contract) and the types of `HLContract` and `Transaction`. Here we also define the types for payoffs, gas etc. These are all aliased to `Double`.
+- `Parametrization.hs` defines the concrete parametrizations used for the analysis: e.g. intrinsic utility of **Buyer**'s transaction, fixed costs for initiating a Ledger-Hedger contract etc.
+- `Types.hs` is where we define the types of the decisions to be taken (e.g. $Wait$ or $Initiate$ a Ledger-Hedger contract) and the types of `HLContract` and `Transaction`. Here we also define the types for payoffs, gas etc. These are all aliased to `Double`.
 - `ActionSpaces.hs` is mainly needed for technical type-transformations. It maps a player's decision type into the type needed to be fed in the subsequent game.
 - `Analytics.hs` defines the equilibrium notion for each game we want to test.
 - `Diagnostics.hs` is the file detailing which and how much information we want to show when strategies are tested.
