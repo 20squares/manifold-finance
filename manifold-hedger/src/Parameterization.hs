@@ -75,5 +75,5 @@ parameters = Parameters
   testTransaction
   testContract
   100
-  id
-  id
+  logUtility
+  logUtility
