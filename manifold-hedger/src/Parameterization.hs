@@ -41,7 +41,7 @@ testStrategyTupleTarget = completeStrategy testStrategy
 
 testContract = HLContract
    (10**9)
-   0
+   100
    1
    (0.1*10**6)
    (75*10**3)
