@@ -52,10 +52,11 @@ executables:
 tests:
   manifold-hedger-test:
     main:                Spec.hs
-    source-dirs:         test
+    source-dirs:         src/test
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - manifold-hedger
+    - hspec

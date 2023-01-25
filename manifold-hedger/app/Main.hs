@@ -9,10 +9,10 @@ main = do
   putStrLn "EVALUATION OF GAME"
   let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
   putStrLn "\n COMPLETE GAME"
-  printEquilibriumCompleteGame strategyComplete parameters
+  printOutputCompleteGame strategyComplete parameters
   putStrLn "\n ACCEPT SUBGAME"
-  printEquilibriumAcceptSubgame strategyAccept parameters
+  printOutputAcceptSubgame strategyAccept parameters
   putStrLn "\n PUBLISH SUBGAME"
-  printEquilibriumPublishSubgame strategyPublish parameters
+  printOutputPublishSubgame strategyPublish parameters
 
 
