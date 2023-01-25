@@ -20,11 +20,11 @@ actionSpacePublishLHBuyer possibleGas (pi,tx,publishDecision) =
 
 -- | Transform initiate decision into game branching choice
 transformInitiateDecision (Wait               , tx ,_) =  Left tx
-transformInitiateDecision ((Initiate contract), tx, piInit )= Right (tx,contract,piInit)
+transformInitiateDecision ((Initiate contract), tx, piOld )= Right (tx,contract,piOld)
 
 -- | Transform accept decision into game choice
-transformAcceptDecision Decline information = Left information
-transformAcceptDecision Accept  information = Right information
+transformAcceptDecision Decline (tx, contract, piOld) = Left (tx, contract, piOld)
+transformAcceptDecision Accept  (tx, contract, piOld) = Right (tx, contract, piOld)
 
 -- | Transform publish decision into game choice
 transformPublishDecision (Publish gasPub) (tx,contract,piNew,piOld) = Left (tx,contract,piNew,piOld,gasPub)

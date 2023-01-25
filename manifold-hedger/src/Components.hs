@@ -85,7 +85,7 @@ noLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer uti
    inputs    : tx, piNew ;
    feedback  : ;
    operation : dependentDecision buyerName (const [NoOp, Publish 0]);
-   // NOTE ignore the gasPub variable 
+   // NOTE ignore the gasPub variable  as not needed
    outputs   : publishDecision ;
    returns   : utilityFunctionBuyer $ noLHPayoffBuyer wealthBuyer tx piNew publishDecision ;
 
@@ -121,10 +121,10 @@ noLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution utili
    inputs    : ;
    feedback  : ;
    operation : gasPriceDistribution distribution;
-   outputs   : pi ;
+   outputs   : piNew ;
    returns   : ;
 
-   inputs    : tx, pi ;
+   inputs    : tx, piNew ;
    feedback  : ;
    operation : noLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller ;
    outputs   : ;
@@ -155,7 +155,7 @@ recoupLHBuyer buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer
    operation : forwardFunction $ utilitySeller ;
    outputs   : payoffSeller ;
    returns   : ;
-   // Compute payoffs for seller 
+   // Compute payoffs for seller
 
    inputs    : payoffSeller ;
    feedback  : ;
@@ -205,7 +205,7 @@ recoupLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution u
 -- TODO reuse noLHBuyer from above?
 publishLHBuyer buyerName possibleGasPubLS= [opengame|
 
-   inputs    : tx, contract, piOld,piNew  ;
+   inputs    : tx, contract, piNew, piOld  ;
    feedback  : ;
 
    :----------------------------:

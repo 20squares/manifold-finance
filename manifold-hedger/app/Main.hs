@@ -6,12 +6,13 @@ import Parameterization
 
 main :: IO ()
 main = do
+  putStrLn "EVALUATION OF GAME"
   let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
   putStrLn "\n COMPLETE GAME"
-  printOutputCompleteGame strategyComplete parameters
+  printEquilibriumCompleteGame strategyComplete parameters
   putStrLn "\n ACCEPT SUBGAME"
-  printOutputAcceptSubgame strategyAccept parameters
+  printEquilibriumAcceptSubgame strategyAccept parameters
   putStrLn "\n PUBLISH SUBGAME"
-  printOutputPublishSubgame strategyPublish parameters
+  printEquilibriumPublishSubgame strategyPublish parameters
 
 
