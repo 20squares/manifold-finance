@@ -19,21 +19,21 @@ Defines the main analytics for the model
 ------------------------
 -- 1. Equilibrium notion
 -- | Equilibrium definition for complete game
-equilibriumCompleteGame strategy Parameters{..} = evaluate (completeGame buyerName sellerName buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
+equilibriumCompleteGame strategy Parameters{..} = evaluate (completeGame buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
   where
     context =
       StochasticStatefulContext
          (pure ((),(transaction,contract,piInitial))) (\_ _ -> pure ())
 
 -- | Equilibrium definition for accept subgame
-equilibriumAcceptSubGame strategy Parameters{..} = evaluate (acceptSubgame buyerName sellerName buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
+equilibriumAcceptSubGame strategy Parameters{..} = evaluate (acceptSubgame  buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
   where
     context =
       StochasticStatefulContext
          (pure ((),(transaction,contract,piInitial))) (\_ _ -> pure ())
 
 -- | Equilibrium definition for publish subgame
-equilibriumPublishSubGame strategy Parameters{..} = evaluate (publishSubgame buyerName sellerName buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
+equilibriumPublishSubGame strategy Parameters{..} = evaluate (publishSubgame  buyerWealth sellerWealth distribution actionSpaceGasPub utilityFunctionBuyer utilityFunctionSeller) strategy context
   where
     context =
       StochasticStatefulContext
