@@ -33,6 +33,7 @@ library
       Parameterization
       Payoffs
       Strategies
+      TestGame
       Types
   other-modules:
       Paths_manifold_hedger

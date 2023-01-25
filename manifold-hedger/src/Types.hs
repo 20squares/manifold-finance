@@ -38,6 +38,8 @@ type Gas        = Double
 type GasPrice   = Double
 type Utility    = Double
 
+newtype GasPriceNew = GasPriceNew Double
+
 -- | HL contract
 data HLContract = HLContract
   { collateral    :: Collateral
