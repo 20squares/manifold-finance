@@ -41,7 +41,7 @@ testStrategyTupleTarget = completeStrategy testStrategy
 
 testContract = HLContract
    (10**9)
-   100
+   0
    1
    (0.1*10**6)
    (75*10**3)
@@ -72,7 +72,7 @@ parameters = Parameters
   "seller"
   (10**9)
   (10**9)
-  (normalDistribution 3)
+  (normalDistribution 5)
   testActionSpaceGasPub
   testTransaction
   testContract
