@@ -19,10 +19,14 @@ actionSpacePublishLHBuyer possibleGas (pi,tx,publishDecision) =
     Publish _ -> fmap Publish possibleGas
 
 -- | Transform initiate decision into game branching choice
+transformInitiateDecision
+  :: (InitialDecisionBuyer HLContract, Transaction, GasPrice) -> Either Transaction (Transaction, HLContract, GasPrice)
 transformInitiateDecision (Wait               , tx ,_) =  Left tx
 transformInitiateDecision ((Initiate contract), tx, piOld )= Right (tx,contract,piOld)
 
 -- | Transform accept decision into game choice
+transformAcceptDecision
+  :: AcceptDecisionSeller -> (Transaction, HLContract, GasPrice) -> Either (Transaction, HLContract, GasPrice) (Transaction, HLContract, GasPrice)
 transformAcceptDecision Decline (tx, contract, piOld) = Left (tx, contract, piOld)
 transformAcceptDecision Accept  (tx, contract, piOld) = Right (tx, contract, piOld)
 
