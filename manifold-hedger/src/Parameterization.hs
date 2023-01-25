@@ -53,7 +53,7 @@ testTransaction = Transaction
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
-normalDistribution standardDeviationParameter = shape normal [0..1]
+normalDistribution standardDeviationParameter = shape normal [99,100,101]
   where
    normal = normalCurve 100 (10**(standardDeviationParameter+1))
 
