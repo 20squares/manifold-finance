@@ -26,26 +26,31 @@
 
 
 # Summary
-This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular the **Seller**). Our model allows for custom definitions of risk-sensitivity for all players.
+This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular **Seller**). Our model allows for custom definitions of risk-sensitivity for all players.
 
 ## Analytics results
-First of all, we tried to replicate the analysis outlined in the paper. So we instantiated the model with the following parameters (the instantiation can be found in `Parameters.hs`):
+**The most important finding in our simulations is that Ledger-Hedger is incredibly sensible to initial parameters, and not as robust as we would have expected.**
 
-| **Parameter**  | **Name in the paper** | **Value**        |
-|:---------------|:---------------------:|-----------------:|
-| `wealth`       | $W^{init}_{Buyer}$    | $10^9$           |
-| `wealth`       | $W^{init}_{Seller}$   | $10^9$           |
-| `collateral`   | $$col$$               | $10^9$           |
-| `payment`      | payment               | $100$            |
-| `epsilon`      | $\epsilon$            | $1$              |
-| `gasInitiation`| $g_{init}$            | $0.1 \cdot 10^6$ |
-| `gasAccept`    | $g_{accept}$          | $75 \cdot 10^3$  |
-| `gasDone`      | $g_{done}$            | $20 \cdot 10^3$  |
-| `gasAllocTX`   | $g_{alloc}$           | $5 \cdot 10^6$   |
+A more detailed analysis can be found in the section:
 
-These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed the paper by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(s)$. These function represent risk-aversity.
+First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. In general, this is a sympthom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
 
-As for future price distribution, we defined it as `testDistribution`: This is a normal distribution centered around the initial gas price. Moreover, we defined  `testActionSpaceGasPub`, representing the range in which $g_{pub}$ can swing. $g_{pub}$ is the gas consumed if **Buyer** decides to issue the transaction at market price, thus without resorting to Ledger-Hedger. In practice, we followed the paper and equated $g_{pub}$ and $g_{alloc}$, meaning that **Buyer** is using Ledger-Hedger to reserve the precise amount of gas needed to execute the transaction.
+- The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**.
+- In the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
+
+So, just considering this, **Seller** incurs a cost that is **4** orders of magnitude higher than the price paid by **Buyer**. This choice of parameters makes the protocol extremely fragile, something that is counteracted only by the fact that we are using very concave utility functions, which represent quite high risk-aversity.
+
+Indeed, we find out that in a risk-neutral scenario there is no difference between using or not using Ledger-Hedger *if and only if* the usage fees and payments are *both* set to **0**, meaning that the protocol is essentially 'free to use for everyone'.
+
+Summarizing, our main findings are the following:
+- Running the protocol with the parameters provided in the paper makes no sense, as the advantage in using Ledger-Hedger is very low even for very risk-averse players.
+- Using Ledger-Hedger makes players incur in extra costs: **Seller** pays a fee for using the platform, whereas **Buyer** pays a (smaller) fee for using the platform *and* has also to pay **Seller** a price premium.
+- These expenses are only offset by the risk-aversity of the players. The more risk-averse they are, the more it makes sense for them to carry these extra costs.
+- Varying the price parameter won't help much, as price constitutes revenue for **Seller** but a cost for **Buyer**. So the more we make it convenient for the former, the less we make it convenient for the latter, and vice-versa.
+- As it is instantiated, the protocol is so brittle that even small changes in the standard deviation of future gas price distribution disturb the equilibrium.
+- To make the protocol more robust, the only viable option is lowering the fees for the usage of the platform, which constitute a cost both for **Buyer** and for **Seller**. 
+- Finally, we hypothesize that the situation could change if **Buyer** and **Seller** have private information about the future gas price distribution. That is, the future gas price distribution is not anymore assumed to be a normal curve centered around the current price. This has not been simulated yet, as it was not included in the current working package.
+
 
 # Installation
 
@@ -353,7 +358,23 @@ In addition to the DSL defining the 'piping rules' between boxes, we provide som
 - A *addPayoffs* internal operation: Since in our software everything is a game, we need to keep track of who-is-who. Namely, there may be different subgames in our model that are played by the same player. In this situation, the payoffs of these subgames must be combined. *addPayoffs* does exactly this form of bookkeeping.
 
 ### Supplying strategies
-*Strategies* are supplied as tuples, once for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`.
+*Strategies* are supplied as tuples, once for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`. These tuples are provided in `Parametrization.hs`. The single functions making up the tuples in `Parmetrization.hs` are in turn defined in `Strategies.hs`.
+
+To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`.  In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a repl (Cf. [Interactive Execution](#interactive-execution)) and give the command 'main'.
+You can make parametric changes in `Parametrization.hs` or even define new strategies and/or notions of equilibrium by editing `Stategies.hs` and `Analytics.hs`, respectively. Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
+
+As a word of caution, notice in a game with branching, we need to provide a possible strategy for each branch. For example, suppose to have the following game:
+
+- Player 1 can choose between option A and B;
+    - case A: Player 2 can choose between option A1 or A2;
+    - case B: Player 2 can choose between option B1 or B2;
+
+Moreover, suppose that the payoffs are as follows: 
+
+- If Player1 chooses A, and then Player2 chooses A1, then both players get 100$.
+- In any other case, both players get 0$.
+
+In this game the best strategy is clearly (A,A1). Nevertheless, we need to supply a strategy for Player2 also in the 'B' branch: Even if Player1 will never rationally choose B, Player2 needs to be endowed with a clear choice between B1 and B2 in case this happens.
 
 ### Branching
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
@@ -399,3 +420,67 @@ The model is composed of several files:
 - `Diagnostics.hs` is the file detailing which and how much information we want to show when strategies are tested.
 
 Relying on the DSL Primer, parsing the code structure should be a manageable task.
+
+# Analytics
+
+For more information about how to supply strategies and/or how to make changes, please refer to the section [Supplying Strategies](#supplying-strategies).
+
+## Reading the analytics
+
+Analitycs in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in eqilibrium`.
+
+For games with branching, there will also be a `NOTHING CASE`. To understand this, consider a game (call it `First Game`) that can trigger two different subgames (`Subgame branch 1`, `Subgame branch 2`, respectively) depending on the player's choice. Analytics would read like this:
+
+```
+ Game name
+First Game:
+
+ Strategies are in equilibrium
+Subgame branch 1:
+
+ NOTHING CASE
+Subgame branch 2:
+
+ Strategies are in equilibrium
+```
+
+Here `NOTHING CASE` signifies that the choice provided by the player results in not visiting `Subgame branch 1`, which is thus never played in this senario: Evidently, the choice made by the player in `First Game` resulting in the play continuing on `Subgame branch 2`.
+
+On the contrary, analytics become more expressive when the game is *not* in equilibrium. In this case, the engine will suggest a more profitable deviation by displaying the following prompt:
+
+```
+Strategies are NOT in equilibrium. Consider the following profitable deviations: 
+
+Player: 
+Optimal Move: 
+Current Strategy:
+Optimal Payoff: 
+Current Payoff: 
+Observable State:
+ --other game-- 
+ --No more information--
+```
+
+`Observable State` contains a dump of all the game parameters that are currenlty observable by all players. This is usually a lot of information, mainly useful for debugging purposes. All the other field names are pretty much self-describing. 
+
+
+## Replicating the Ledger-Hedger Paper results
+To replicate the results claimed in the Ledger-Hedger paper, we instantiated the model with the following parameters (the instantiation can be found in `Parameters.hs`):
+
+| **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
+|:--------------:|:---------------------:|:-----------:|:----------:|
+| `wealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
+| `wealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract | $10^9$           |
+| `payment`      | payment               | The payment **Buyer** makes to **Seller** when LH contract is concluded. | $100$            |
+| `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
+| `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0.1 \cdot 10^6$ |
+| `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $75 \cdot 10^3$  |
+| `gasDone`      | $g_{done}$            | Cost of closing a LH contract. | $20 \cdot 10^3$  |
+| `gasAllocTX`   | $g_{alloc}$           | Gas reserved in the LH contract. | $5 \cdot 10^6$   |
+| `gasPub`   | $g_{pub}$           | Gas size of the TX if issued at current market price. | $5 \cdot 10^6$   |
+
+These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed what the authors did by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(x)$. These function represent risk-aversity.
+
+As for future price distribution, we defined it as `testDistribution`: This is a normal distribution centered around the initial gas price. Again, we used the standard deviations suggested in the paper. Moreover, we defined `testActionSpaceGasPub`, representing the range in which $g_{pub}$ can swing. $g_{pub}$ is the gas consumed if **Buyer** decides to issue the transaction at market price, thus without resorting to Ledger-Hedger. In practice, we followed the paper and equated $g_{pub}$ and $g_{alloc}$, meaning that **Buyer** is using Ledger-Hedger to reserve the precise amount of gas needed to execute the transaction.
+
