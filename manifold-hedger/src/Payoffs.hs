@@ -14,6 +14,10 @@ noLHPayoffBuyer wealthBuyer (Transaction{..}, priceNew, (Publish _)) = wealthBuy
 noLHPayoffSeller :: Wealth -> Transaction -> GasPrice -> PayoffHL
 noLHPayoffSeller wealthSeller Transaction{..} priceNew = wealthSeller +  gasAllocTX * priceNew
 
+
+------------------------------
+-- Payoffs after initialization
+-- In all games, the buyer must carry the initialization costs
 -- | Alias for the recoup case
 recoupLHPayoffSeller = noLHPayoffSeller
 
@@ -27,7 +31,8 @@ recoupLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, pric
     netUtility = utilityFromTX - (gasAllocTX * priceNew)
     costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
 
-
+------------
+-- In all subgames from here on, the seller must carry the acceptance costs 
 -- | PayoffHL for seller when fullfilling the contract
 -- TODO Check _gasAlloc_
 fulfillLHPayoffSeller :: Wealth -> (Transaction, HLContract, Gas, GasPrice,GasPrice,FulfillDecisionSeller) -> PayoffHL
@@ -35,9 +40,9 @@ fulfillLHPayoffSeller wealthSeller (Transaction{..}, HLContract{..}, gasPub, pri
   case decision of
     Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
     Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
-    Confirm -> wealthSeller + payment + collateral + epsilon - ((gasAllocTX - (gasPub + gasDone))*priceNew) + costsAcceptance
+    Confirm -> wealthSeller + payment + collateral + epsilon + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
   where
-    costsAcceptance = - ((gasAccept * priceOld) + collateral)
+    costsAcceptance = ((-gasAccept) * priceOld) - collateral
 
 -- | PayoffHL for seller when not fullfilling the contract
 -- TODO Check _gasAlloc_
@@ -47,7 +52,7 @@ noFulfillLHPayoffSeller wealthSeller ( Transaction{..}, HLContract{..}, priceNew
     Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
     Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
   where
-    costsAcceptance = - ((gasAccept * priceOld) + collateral)
+    costsAcceptance =  ((-gasAccept) * priceOld) - collateral
 
 -- | PayoffHL for buyer conditional on the fulfillment decision
 -- NOTE we build in the decision to transact when exhaust or ignore decisions by seller are made

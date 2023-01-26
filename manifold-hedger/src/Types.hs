@@ -1,9 +1,16 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Types
   where
+
+
+import qualified Data.ByteString.Lazy as L
+import           Data.Csv
+import           Data.Vector
+import           GHC.Generics
 
 import OpenGames.Engine.Engine
 
@@ -76,6 +83,18 @@ data Parameters = Parameters
   , utilityFunctionBuyer :: UtilityFunction
   , utilityFunctionSeller :: UtilityFunction
   }
+
+-- 5. Import distribution
+
+type ProbabilityMass = Double
+
+data ImportProbabilityTuple = ImportProbabilityTuple
+  { value :: GasPrice
+  , probMass :: ProbabilityMass
+  } deriving (Generic,Show)
+
+instance FromNamedRecord ImportProbabilityTuple
+instance DefaultOrdered ImportProbabilityTuple
 
 -- 5. strategies
 -- | Define general strategy type for constructing the relevant subgame strategies

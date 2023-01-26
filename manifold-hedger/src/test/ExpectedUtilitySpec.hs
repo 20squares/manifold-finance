@@ -18,6 +18,7 @@ spec :: Spec
 spec = do
   payoffsSeller
   payoffsSellerPayment
+  equilibriumPayoffConditions
 
 recoupPayoffSellerExpected Parameters{..} = do
   price <- distribution
@@ -40,7 +41,9 @@ testContractPayment payment =
       (75*10**3)
       (20*10**3)
 
-
+diff parameters decision = payoff > 0
+  where
+    payoff = (expected $ fulfillLHPayoffSellerExpected parameters decision) - (expected $ recoupPayoffSellerExpected parameters)
 
 -- Parameters with varying payment
 parametersPayment payment = Parameters
@@ -55,7 +58,19 @@ parametersPayment payment = Parameters
   100
   logUtility
   logUtility
-  where
+
+parametersPayment price = Parameters
+  "buyer"
+  "seller"
+  (10**9)
+  (10**9)
+  (normalDistribution 2)
+  testActionSpaceGasPub
+  testTransaction
+  testContract
+  price
+  logUtility
+  logUtility
 
 payoffsSeller = describe
   "payoff seller" $ do
@@ -101,8 +116,9 @@ payoffsSellerPayment = describe
         (20.717750077351447)
 
 
-{-
-payoffsErrorSeller = descrine
-   "NaN values seller " $ do
-     it  "why the NaN values for Ignore?"
---}
+equilibriumPayoffConditions = describe
+   "payoff conditions for seller" $ do
+      it "is accepting better than not accepting?" $ do
+        shouldBe
+         (diff parameters Confirm)
+         True

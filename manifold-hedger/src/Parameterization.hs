@@ -13,7 +13,11 @@ import Model
 import Payoffs
 import Strategies
 import Types
-import Numeric.Probability.Distribution (shape)
+
+import qualified Data.ByteString.Lazy as L
+import           Data.Csv
+import qualified Data.Vector          as V
+import Numeric.Probability.Distribution (shape, norm, fromFreqs)
 import Numeric.Probability.Shape (normalCurve)
 
 {-
@@ -53,9 +57,13 @@ testTransaction = Transaction
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
-normalDistribution standardDeviationParameter = shape normal [0..200]
-  where
-   normal = normalCurve 100 (10**(standardDeviationParameter+1))
+-- Import from external
+
+decodeImportProb :: L.ByteString -> Either String (Header, V.Vector ImportProbabilityTuple)
+decodeImportProb content = decodeByName content
+
+fromVectorToProbDist :: V.Vector ImportProbabilityTuple -> Stochastic GasPrice
+fromVectorToProbDist = norm . fromFreqs . (fmap (\x -> (value x, probMass x))) . V.toList
 
 testActionSpaceGasPub = [0,(5 * 10**6)]
 
@@ -65,17 +73,19 @@ testActionSpaceGasPub = [0,(5 * 10**6)]
 logUtility x = log x
 
 squareRootUtility x = sqrt x
+
 -------------------------
 -- 5. Complete parameters
-parameters = Parameters
+parameters distribution = Parameters
   "buyer"
   "seller"
   (10**9)
   (10**9)
-  (normalDistribution 3)
+  distribution
   testActionSpaceGasPub
   testTransaction
   testContract
   100
   logUtility
   logUtility
+
