@@ -70,7 +70,7 @@ testActionSpaceGasPub = [0,(5 * 10**6)]
 
 --------------------------
 -- 4. Utility functions
-logUtility x = log x
+logUtility x = logBase 10 x
 
 squareRootUtility x = sqrt x
 

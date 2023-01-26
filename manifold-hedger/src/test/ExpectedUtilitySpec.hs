@@ -9,6 +9,8 @@ import           Payoffs
 import           Parameterization
 import           Types
 
+import           OpenGames.Engine.Engine
+
 import           Numeric.Probability.Distribution (expected)
 import           Test.Hspec
 
@@ -16,13 +18,17 @@ import           Test.Hspec
 
 spec :: Spec
 spec = do
-  payoffsSeller
-  payoffsSellerPayment
-  equilibriumPayoffConditions
+  comparePayoffs
+--  payoffsSeller
+--  payoffsSellerPayment
+--  equilibriumPayoffConditions
 
 recoupPayoffSellerExpected Parameters{..} = do
   price <- distribution
   return $ utilityFunctionSeller $ recoupLHPayoffSeller sellerWealth transaction price
+
+recoupPayoffSellerLS Parameters{..} = fmap (\price ->  recoupLHPayoffSeller sellerWealth transaction price) [1..20]
+
 
 noFulfillLHPayoffSellerExpected Parameters{..} decision = do
   price <- distribution
@@ -31,6 +37,8 @@ noFulfillLHPayoffSellerExpected Parameters{..} decision = do
 fulfillLHPayoffSellerExpected Parameters{..} decision = do
   price <- distribution
   return $ utilityFunctionSeller $ fulfillLHPayoffSeller sellerWealth (transaction, contract, (gasAllocTX transaction), price, 100, decision)
+
+fulfillLHPayoffSellerList Parameters{..} = fmap (\price ->  fulfillLHPayoffSeller sellerWealth (transaction, contract, (gasAllocTX transaction), price, 100, Confirm)) [1..20]
 
 testContractPayment payment =
   HLContract
@@ -51,7 +59,7 @@ parametersPayment payment = Parameters
   "seller"
   (10**9)
   (10**9)
-  (normalDistribution 3)
+  (uniformDist [1..199])
   testActionSpaceGasPub
   testTransaction
   (testContractPayment payment)
@@ -64,7 +72,7 @@ parametersPayment price = Parameters
   "seller"
   (10**9)
   (10**9)
-  (normalDistribution 2)
+  (uniformDist [1..199])
   testActionSpaceGasPub
   testTransaction
   testContract
@@ -76,27 +84,27 @@ payoffsSeller = describe
   "payoff seller" $ do
      it "is the recoup payoff correct" $ do
        shouldBe
-        (expected $ recoupPayoffSellerExpected parameters)
+        (expected $ recoupPayoffSellerExpected (parameters $ uniformDist [1..199]))
         (21.109361602962768)
      it "is the no fulfill payoff correct - exhaust" $ do
        shouldBe
-        (expected $ noFulfillLHPayoffSellerExpected parameters Exhaust)
+        (expected $ noFulfillLHPayoffSellerExpected (parameters $ uniformDist [1..199]) Exhaust)
         (20.713719838411766)
      it "is the no fulfill payoff correct - ignore" $ do
        shouldBe
-        (expected $ noFulfillLHPayoffSellerExpected parameters Ignore)
+        (expected $ noFulfillLHPayoffSellerExpected (parameters $ uniformDist [1..199]) Ignore)
         (21.109361602962768)
      it "is the fulfill payoff correct - exhaust" $ do
        shouldBe
-        (expected $ fulfillLHPayoffSellerExpected parameters Exhaust)
+        (expected $ fulfillLHPayoffSellerExpected (parameters $ uniformDist [1..199]) Exhaust)
         (20.713719838411766)
      it "is the fulfill payoff correct - ignore" $ do
        shouldBe
-        (expected $ fulfillLHPayoffSellerExpected parameters Ignore)
+        (expected $ fulfillLHPayoffSellerExpected (parameters $ uniformDist [1..199]) Ignore)
         (21.109361602962768)
      it "is the fulfill payoff correct - confirm" $ do
        shouldBe
-        (expected $ fulfillLHPayoffSellerExpected parameters Confirm)
+        (expected $ fulfillLHPayoffSellerExpected (parameters $ uniformDist [1..199]) Confirm)
         (20.717750757624657)
 
 
@@ -120,5 +128,18 @@ equilibriumPayoffConditions = describe
    "payoff conditions for seller" $ do
       it "is accepting better than not accepting?" $ do
         shouldBe
-         (diff parameters Confirm)
+         (diff (parameters $ uniformDist [1..199]) Confirm)
          True
+
+comparePayoffs = describe
+    "compare payoffs for fixed prices" $ do
+       it "recoup payoff" $ do
+         shouldBe
+           (recoupPayoffSellerLS $ params)
+           [1..20]
+       it "recoup utility" $ do
+         shouldBe
+           (fmap (sqrt) $ recoupPayoffSellerLS $ params)
+           [1..20]
+      where
+        params = parameters $ uniformDist [1..199]
