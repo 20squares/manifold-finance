@@ -17,14 +17,14 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 ## Recap: The Hedger-Ledger paper
 As our model is based on the Ledger-Hedger paper, we start by briefly recalling the main highlights of this work.
 
-[Ledger Hedger](https://eprint.iacr.org/2022/056.pdf) is a game-theoretic mechanism for gas price reservation. *Gas size* denotes the amount of computational work needed to execute a given function in a smart contract. For instance, in the Ethereum ecosystem every EVM instruction has a fixed gas size. As the blockspace demand varies overtime, transaction issuers dinamically specify the fees they are willing to pay to get their transactions included by providing a *gas price*: The total amount the issuer will pay to the miner (or whatever equivalent role a given blockchain provides) for a given transaction to be executed is then determined as the product between gas size and gas price.
+[Ledger Hedger](https://eprint.iacr.org/2022/056.pdf) is a game-theoretic mechanism for gas price reservation. *Gas size* denotes the amount of computational work needed to execute a given function in a smart contract. For instance, in the Ethereum ecosystem every EVM instruction has a fixed gas size. As the blockspace demand varies overtime, transaction issuers dynamically specify the fees they are willing to pay to get their transactions included by providing a *gas price*: The total amount the issuer will pay to the miner (or whatever equivalent role a given blockchain provides) for a given transaction to be executed is then determined as the product between gas size and gas price.
 
-The fact that gas price varies with market conditions, generally rising when demand is high and falling when it's not, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, it can be a problem for miners, that may be unable to forecast their future profits. Ledger Hedger provides a mechanism to address this problem. We consider a system with two participants:
+The fact that gas price varies with market conditions, generally rising when demand is high and falling when it's not, can be a problem for some transaction issuers, that would like to reserve a fixed gas price beforehand. Similarly, it can be a problem for miners, that may be unable to forecast their future profits. Ledger Hedger provides a mechanism to address this problem. We consider a system with two participants:
 
 - **Buyer**, that wants to issue a given transaction in a future block interval $start<end$. The transaction's gas size, which from now on we will call $g_{alloc}$ to keep consistent with the paper, is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
 
-This mechanism defines an interactive games articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
+This mechanism defines an interactive game articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
 
 ![Hedger-Ledger statespace](game_statespace.png)
 
@@ -102,12 +102,12 @@ Perhaps the most important assumption we made explicit is around the notion of r
 
 In a nutshell, *risk propensity* denotes how much one prefers a certain payoff versus an uncertain one. To give a simple example, let us imagine a lottery where one can win between 0 and 100 dollars randomly. The expected payoff in this scenario is 50 dollars. A *risk-averse* player will prefer to receive 50 dollars with certainty than playing the lottery. On the contrary, a *risk-loving* player will prefer to play the lottery: the hope for a higher payoff wins over the possibility of getting a lower one. A *risk-neutral* player will be unbiased with respect to which game to play.
 
-In the Hedger Ledger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger Hedger is exactly hedging against the uncertainty of future gas price fluctuations: 
+In the Hedger Ledger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger Hedger is exactly hedging against the uncertainty of future gas price fluctuations:
  - A risk-averse **Buyer** seeks protection against the possibility of prices rising, resulting in bigger expenses;
  - A risk-averse **Seller** seeks protection against the possibility of prices falling, resulting in less profit.
 So, for both players it makes sense to agree on a fixed gas price beforehand.
 
-To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result to the standard risk-neutral case.
+To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result in the standard risk-neutral case.
 
 ## Code structure
 
@@ -143,7 +143,7 @@ We can imagine this block as a box with 4 wires on its outside, on which travels
 - `input`, data that gets fed to the game (e.g. a player receiving information from a context).
 - `outputs`, data that the game feeds to the outside world (e.g. a player communicating a choice to another player).
 - `returns`, the returns of a player actions, which are usually directly fed to a function calculating payoffs.
-- The `feedback` wire is rarely used in practice. For details about its usage please refer to the relevant [literature](https://arxiv.org/abs/1603.04641).
+- The `feedback` wire which sends information back in time. In the case of the ledger hedger, for instance, the buyer needs information about how he will be affected down the road when making the decision to initiate the contract or not. This information is send through the feedback field. For details about its usage please refer to the relevant [literature](https://arxiv.org/abs/1603.04641).
 
 The `:--:` delimiters separate the outside from the inside of the box. As we see, the interfaces inside are replicated. This allows for a notion of nesting. For instance, the situation depicted in the following picture:
 
@@ -185,19 +185,20 @@ Moreover, we provide some *basic operations* to populate a box, namely:
 - A *function*, which just transforms the input in some output.
 - A *stochastic distribution*, used to implement draws from nature.
 - A *strategic choice*, which can be thought of as a function parametrized over strategies.
-- A *addPayoffs* internal operation: Since in our software everything is a game, we need to keep track of who-is-who. Namely, there may be different subgames in our model that are played by the same player. In this situation, the payoffs of these subgames must be combined. *addPayoffs* does exactly this form of bookkeeping.
 
 #### Supplying strategies
 
-*Strategies* are supplied as tuples, once for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`.
+*Strategies* are supplied as tuples, one for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`.
 
 #### Branching
+
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
 Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice in some other game, this allows for flexible modelling of complex situations.
 
 Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used.
 
 #### Stochasticity
+
 Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
 
 Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
@@ -219,6 +220,10 @@ acceptStrategy = pureAction Accept
 
 The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
+Our analysis is focused on understanding when the targeted equilibrium, where the hedger ledger contract gets initiated and later published by the buyer as well as accepted and confirmed by the seller, can be supported. Concretely, this means:
+
+
+
 ### File structure
 
 The model is composed of several files:
@@ -236,7 +241,7 @@ The model is composed of several files:
 
 Relying on the DSL Primer, parsing the code structure should be a manageable task.
 
-Moreover, the repository is split in two different branches: 
+Moreover, the repository is split in two different branches:
 - In `main` we have the basic model, where both players are supposed to be risk-neutral. Here the code has less overhead and syntactic clutter so we strongly avice to start here to have a better understanding of the code.
 - In `utility-functions` we added two new functions, `utilityFunctionBuyer` and `utilityFunctionSeller`.
 Every game defined in `Model.hs` and `Components.hs` has been edited accordingly. The most important changes are in how `returns` is defined in many subcomponents. If before we had, say, 
