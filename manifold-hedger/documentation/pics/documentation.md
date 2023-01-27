@@ -26,6 +26,7 @@
 
 
 # Summary
+
 This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular **Seller**). Our model allows for custom definitions of risk-sensitivity for all players.
 
 ## Analytics results
@@ -234,10 +235,6 @@ In the Hedger Ledger paper, players are considered to be risk-averse or at best 
 
 To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result in the standard risk-neutral case.
 
-To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. 
-
-The functions represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result to the standard risk-neutral case.
-
 Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`
 
 In practice, these functions are used as follows (cf. [Code deep dive](#code-deep-dive) for syntax details):
@@ -354,39 +351,15 @@ In addition to the DSL defining the 'piping rules' between boxes, we provide som
 - A *function*, which just transforms the input in some output.
 - A *stochastic distribution*, used to implement draws from nature.
 - A *strategic choice*, which can be thought of as a function parametrized over strategies.
-<<<<<<< variant A
->>>>>>> variant B
-- A *addPayoffs* internal operation: Since in our software everything is a game, we need to keep track of who-is-who. Namely, there may be different subgames in our model that are played by the same player. In this situation, the payoffs of these subgames must be combined. *addPayoffs* does exactly this form of bookkeeping.
-======= end
-
-#### Branching
-
-<<<<<<< variant A
->>>>>>> variant B
-To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`.  In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a repl (Cf. [Interactive Execution](#interactive-execution)) and give the command 'main'.
-You can make parametric changes in `Parametrization.hs` or even define new strategies and/or notions of equilibrium by editing `Stategies.hs` and `Analytics.hs`, respectively. Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
-
-As a word of caution, notice in a game with branching, we need to provide a possible strategy for each branch. For example, suppose to have the following game:
-
-- Player 1 can choose between option A and B;
-    - case A: Player 2 can choose between option A1 or A2;
-    - case B: Player 2 can choose between option B1 or B2;
-
-Moreover, suppose that the payoffs are as follows: 
-
-- If Player1 chooses A, and then Player2 chooses A1, then both players get 100$.
-- In any other case, both players get 0$.
-
-In this game the best strategy is clearly (A,A1). Nevertheless, we need to supply a strategy for Player2 also in the 'B' branch: Even if Player1 will never rationally choose B, Player2 needs to be endowed with a clear choice between B1 and B2 in case this happens.
 
 ### Branching
-======= end
+
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
 Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice in some other game, this allows for flexible modelling of complex situations.
 
 Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used.
 
-#### Stochasticity
+### Stochasticity
 
 Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
 
@@ -409,7 +382,7 @@ acceptStrategy = pureAction Accept
 
 The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
-#### Supplying strategies
+### Supplying strategies
 
 The previous example `acceptStrategy` showed the general construction of a strategy for a single player. As usual in classical game theory, a strategy conditions on the observables and assigns a (possibly randomized) action. In the example above, the player observes the transaction, the hedger ledger contract, as well as the (initial) gas price, and then must assign an action (either accept or reject).
 
@@ -420,6 +393,26 @@ So, for instance, if our model consists of three subgames, a strategy for the wh
 ```haskell
 `strGame1 ::- strGame2 ::- strGame3 ::- Nil`.
 ```
+#### Branching
+
+To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`.  In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a repl (Cf. [Interactive Execution](#interactive-execution)) and give the command 'main'.
+You can make parametric changes in `Parametrization.hs` or even define new strategies and/or notions of equilibrium by editing `Stategies.hs` and `Analytics.hs`, respectively. Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
+
+As a word of caution, notice in a game with branching, we need to provide a possible strategy for each branch. For example, suppose to have the following game:
+
+- Player 1 can choose between option A and B;
+    - case A: Player 2 can choose between option A1 or A2;
+    - case B: Player 2 can choose between option B1 or B2;
+
+Moreover, suppose that the payoffs are as follows: 
+
+- If Player1 chooses A, and then Player2 chooses A1, then both players get 100$.
+- In any other case, both players get 0$.
+
+In this game the best strategy is clearly (A,A1). Nevertheless, we need to supply a strategy for Player2 also in the 'B' branch: Even if Player1 will never rationally choose B, Player2 needs to be endowed with a clear choice between B1 and B2 in case this happens.
+
+#### Strategies employed in the analysis
+
 Our analysis is focused on understanding when the targeted equilibrium, where the hedger ledger contract gets initiated and later published by the buyer as well as accepted and confirmed by the seller, can be supported. Concretely, this means we employ the following strategies:
 
 ```haskell
@@ -558,7 +551,8 @@ Observable State:
 `Observable State` contains a dump of all the game parameters that are currenlty observable by all players. This is usually a lot of information, mainly useful for debugging purposes. All the other field names are pretty much self-describing. 
 
 
-## Replicating the Ledger-Hedger Paper results
+## Replicating the Ledger-Hedger Paper results 
+
 To replicate the results claimed in the Ledger-Hedger paper, we instantiated the model with the following parameters (the instantiation can be found in `Parameters.hs`):
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
