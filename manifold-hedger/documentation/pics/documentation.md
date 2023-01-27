@@ -19,11 +19,18 @@
         - [The building blocks](#the-building-blocks)
         - [Exhogenous parameters](#exhogenous-parameters)
         - [Basic operations](#basic-operations)
-        - [Supplying strategies](#supplying-strategies)
         - [Branching](#branching)
+        - [Supplying strategies](#supplying-strategies)
+            - [Evaluating strategies](#evaluating-strategies)
+            - [Stochasticity](#stochasticity)
+            - [Branching](#branching-1)
         - [Stochasticity](#stochasticity)
     - [File structure](#file-structure)
-
+- [Analytics](#analytics)
+    - [Strategies employed in the analysis](#strategies-employed-in-the-analysis)
+    - [Reading the analytics](#reading-the-analytics)
+    - [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results)
+    - [Other analyses](#other-analyses)
 
 # Summary
 
@@ -34,9 +41,9 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 
 A more detailed analysis can be found in the section:
 
-First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail. This is a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
+First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail, and a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
 
-- The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**.
+- The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**. On the upside,the utility loss is in turn marginal for **Buyer**.
 - In the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
 
 So, just considering this, **Seller** incurs a cost that is **4** orders of magnitude higher than the price paid by **Buyer**. This choice of parameters makes the protocol extremely fragile, something that is counteracted only by the fact that we are using very concave utility functions, which represent quite high risk-aversity.
@@ -66,7 +73,7 @@ To 'just' run the model, type
 ```sh
 stack run
 ```
-in the main directory, where the file `stack.yaml` is.
+in the main directory, where the file `stack.yaml` is located.
 The model will be compiled and a predefined set of analytics will be run. The results of the predefined analytics will be shown on terminal.
 
 ## Interactive execution
@@ -86,12 +93,12 @@ in the main directory. The code will compile, and then an interactive terminal (
 | `:l module`     | load module               |
 | `:t expression` | query expression type     |
 
-Of these commands, `:t` is the most important one, as it allows to visualize clearly what type of input we must fed to a given function. For instance, `:t (&&)` produces the output:
+Of these commands, `:t` is the most important one, as it allows to visualize clearly what type of input we must feed to a given function. For instance, `:t (&&)` produces the output:
 
 ```haskell
 (&&) :: Bool -> Bool -> Bool
 ```
-Which tells us that `(&&)` - the logical `and` operator - takes a boolean (a truth value), than another boolean, and returns a boolean (the logical and of the first two).
+Which tells us that `(&&)` - the logical `and` operator - takes a boolean (a truth value), then another boolean, and returns a boolean (the logical `and` of the first two).
 
 Since under the hood games are nothing more than functions, REPL allows us to see the game type by doing `:t gameName`. If the game is parametrized, say, over a string, then `:t gameName "string"` will return the type where the first component has already been filled.
 
@@ -116,11 +123,11 @@ Afterwards, `ghcup` may ask you to install some additional packages before conti
 
 `ghcup` is a very convenient solution in that it installs only in one folder (on Linux systems, `/home/$USER/.ghcup`). Should you decide to get rid of `haskell` altogether, just delete the folder.
 
-**A note of warning:** GHC, the `haskell` compiler installed with ghcup, relies on the GCC compiler. GHC assumes that GCC comes together with all the relevant libraries. As such, in compiling the model you may get errors such as:
+**A note of warning:** GHC, the `haskell` compiler installed with `ghcup`, relies heavily on the GCC compiler. GHC assumes that GCC comes together with all the relevant libraries. As such, in compiling the model you may get errors such as:
 ```sh
 /usr/bin/ld.gold: error: cannot find -ltinfo
 ```
-these errors hint at missing GCC library, which will have to be installed independently. The precise iter to do so depends on the libraries involves and on your operating system. Unfortunately there is little we can do about it, as this is a problem with the general `haskell` developer infrastructure.
+these errors hint at missing GCC libraries, which will have to be installed independently. The precise iter to do so depends on the libraries involved and on your operating system. Unfortunately there is little we can do about it, as this is a problem with the general `haskell` developer infrastructure.
 
 
 # Explaining the model
@@ -146,7 +153,7 @@ This mechanism defines an interactive game articulated in two phases, called $\v
 Let us give a more detailed view of all the moving components in this picture.
 
 - Phase I happens in a timeframe ranging from the current block to a block called $acc$, by which **Seller** will have to either accept or reject **Buyer**'s offer.
-- Phase II happens within the block interval $start<end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and in which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
+- Phase II happens within the block interval $start<end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and within which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
 
 ### Ledger-Hedger: The subgame space
 
@@ -154,12 +161,12 @@ Let us now describe the subgame space:
 - **InitLH** is where **Buyer** can decide to either use or not use Leger-Hedger.
     - In the former case ($Wait$), **Buyer** just has to wait until $start$;
     - In the latter case ($Initiate$), buyer initiates the mechanism by:
-        -paying an amount $SentTokens$;
-        - specifying $acc$, the block number by which **Seller** must accept **Buyer**'s request. This effectively fixes when Phase I will end.
-        - specifying $start < end$, the block interval within which **Buyer** wants to execute the transaction.
-        - $g_{alloc}$, the amount of gas units **Buyer** wishes to use.
-        - $col$, some non-negative amount of tokens that **Seller** must provide in order to accept the request.
-        - $\epsilon$, a non-negative parameter needed to swing the game-theoretic equilibrium in a favourable direction.
+        - Paying an amount $SentTokens$.
+        - Specifying $acc$, the block number by which **Seller** must accept **Buyer**'s request. This effectively fixes when Phase I will end.
+        - Specifying $start < end$, the block interval within which **Buyer** wants to execute the transaction.
+        - Specifying $g_{alloc}$, the amount of gas units **Buyer** wishes to use.
+        - Specifying $col$, some non-negative amount of tokens that **Seller** must provide in order to accept the request.
+        - Specifying $\epsilon$, a non-negative parameter needed to swing the game-theoretic equilibrium in a favourable direction.
         - All the above-mentioned parameters are fixed only once, and then are considered immutable. As it will become clear soon, the gas price **Buyer** is offering, which in the paper is denoted $\pi_{contract}$, can be calculated as: $$\pi_{contract} := \frac{SentTokens}{g_{alloc}}$$
 
 - **AcceptLH**, where **Seller** must decide if accepting or declining **Buyer**'s offer.
@@ -169,13 +176,13 @@ Let us now describe the subgame space:
 
 - **NoLH** is the subgame resulting from **Buyer** not having used Ledger-Hedger. Here **Buyer** can decide to either publish the transaction anyway ($Publish$), which gets confirmed at market price, or to not publish the transaction ($No-op$).
 - **RecoupLH** is the subgame where **Buyer**'s proposition was not accepted. **Buyer** can either:
-    - Choose to Recoup their funds ($Recoup$), in which case **Buyer** receives back the amount $SentTokens$ in full
+    - Choose to Recoup the funds ($Recoup$), in which case **Buyer** receives back the amount $SentTokens$ in full.
     - Choose to not recoup the funds ($Forfait$), in which case the amount $SentTokens$ is lost.
 - **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ($Publish$) or not ($No-op$).
 - **FullfillTX** is the subgame where **Seller** can:
     - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$.
     - Exhaust the contract ($Exhaust$). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
-    This is fundamental, as the lower payoff makes $Confirmm$ a rationally better choice than $Exhaust$, thus incentivizing **Seller** not to 'betray' **Buyer**.
+    This is fundamental, as the lower payoff makes $Confirm$ a rationally better choice than $Exhaust$, thus incentivizing **Seller** not to 'betray' **Buyer**.
     - Ignore the situation ($Ignore$) by not doing anything. This results in **Seller** losing their collateral $col$.
 - **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never published the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
 
@@ -185,7 +192,7 @@ In formalizing Ledger-Hedger, we had to make some assumptions, that were kept im
 
 ### Refined payoffs
 
-First of all, the payoff types had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. This is represents the desire for **Buyer** to see the transaction included in a block and is one of the main driver to use Ledger-Hedger in the first place. 
+First of all, the payoff types had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. This is represents the desire for **Buyer** to see the transaction included in a block and is one of the main drivers to use Ledger-Hedger in the first place. 
 
 In our model, a transaction is defined as a record of type:
 
@@ -201,7 +208,7 @@ Another problem that required attention is the overall payoff structure. Ledger-
 
 Adopting this flow perspective, things change a great deal if one decides to add payoffs 'as things progress' or if one calculates them only when the end of a branch is reached. 
 
-In the first case, payoffs can become negative at some stages of the game: For instance, in the subgame **AcceptLH** **Seller** gets a negative payoff when the $Accept$ decision is taken. Clearly, this allows the game to progress and **Seller** will be able to recoup the collateral together with the mining fee later on, making the payoff positive overall.
+In the first case, payoffs can become negative at some stages of the game: For instance, in the subgame **AcceptLH**, **Seller** gets a negative payoff when the $Accept$ decision is taken. Clearly, this allows the game to progress and **Seller** will be able to recoup the collateral together with the mining fee later on, making the payoff positive overall.
 
 Still, adding payoffs as things progress can cause problems when one notices that the utility functions representing risk-aversion - namely `sqrt` and `log` - are well-defined only for positive numbers. To avoid this inconsistency problems we opted for calculating payoffs only when the end of a branch is reached. We also think that this represents better rational players, which are able to reason about the game until 'the very end'.
 
@@ -227,11 +234,13 @@ We stuck to the nomenclature used in the paper to aid comprehension, but since t
 
 ### Modelling risk explicitly
 
-Perhaps the most important assumption we made explicit is around the notion of risk the players in the paper - **Buyer** and **Seller**, respectively - have.
+Perhaps the most important assumption we made explicit is around the notion of risk that the players in the paper - **Buyer** and **Seller**, respectively - have.
 
-In a nutshell, *risk propensity* denotes how much one player prefers a *certain* payoff versus an *uncertain* one. As a simple example, let us imagine a lottery where one can win between 0 and 100 dollars with equal probability. The expected payoff in this scenario is 50 dollars. A *risk-averse* player will prefer to receive 50 dollars with certainty than playing the lottery. On the contrary, a *risk-loving* player will prefer to play the lottery: the hope for a higher payoff wins over the possibility of getting a lower one. A *risk-neutral* player will be unbiased with respect to which game to play.
+In a nutshell, *risk propensity* denotes how much one player prefers a *certain* payoff versus an *uncertain* one. 
+    
+    As a simple example, let us imagine a lottery where one can win between 0 and 100 dollars with equal probability. The expected payoff in this scenario is 50 dollars. A *risk-averse* player will prefer to receive 50 dollars with certainty than playing the lottery. On the contrary, a *risk-loving* player will prefer to play the lottery: the hope for a higher payoff wins over the possibility of getting a lower one. A *risk-neutral* player will be unbiased with respect to which game to play.
 
-In the Hedger Ledger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger Hedger is exactly hedging against the uncertainty of future gas price fluctuations:
+In the Ledger-Hedger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger Hedger is exactly hedging against the uncertainty of future gas price fluctuations:
  - A risk-averse **Buyer** seeks protection against the possibility of prices rising, resulting in bigger expenses;
  - A risk-averse **Seller** seeks protection against the possibility of prices falling, resulting in less profit.
 
@@ -277,14 +286,14 @@ gameName variables = [opengame|
 ```
 
 We can imagine this block as a box with 4 wires on its outside, on which travels information marked as:
-- `input`, data that gets fed into the game (e.g. a player receiving information from a context).
+- `inputs`, data that gets fed into the game (e.g. a player receiving information from a context).
 - `outputs`, data that the game feeds to the outside world (e.g. a player communicating a choice to another player).
 - `returns`, the returns of a player actions, which are usually directly fed to a function calculating payoffs.
-- The `feedback` wire which sends information back in time. In the case of the ledger hedger, for instance, the buyer needs information about how he will be affected down the road when making the decision to initiate the contract or not. This information is send through the feedback field. For details about its usage please refer to the relevant [literature](https://arxiv.org/abs/1603.04641).
+- The `feedback` wire which sends information back in time. If, intuitively, `returns` represents the returns on a player action, one could imagine it as 'information that an agents receive from the future'. `feedback` is the dual analog of that: If a given piece of information comes from the future, someone in the future must have been sent it to the past. For additional details about the `feedback` wire please refer to the relevant [literature](https://arxiv.org/abs/1603.04641).
 
 The `:--:` delimiters separate the outside from the inside of the box. As one can see, the interfaces inside are replicated. This is intentional as it allows for a notion of *nesting*. For instance, the situation depicted in the following picture:
 
-![Alt text](box.png)
+![An open grame in graphical form](box.png)
 
 Can be represented by the following code block:
 
@@ -318,7 +327,7 @@ In turn, `Subgame1` and `Subgame2` can be other games defined using the same DSL
 
 ### Exhogenous parameters
 
-An exogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exhogenous parameters could be the market conditions at the time when a game is played.
+An exogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exhogenous parameter could be the market conditions at the time when a game is played.
 
 Exhogenous parameters are just defined as variables, as the field `variables` in the previous code blocks testifes. These variables can in turn be fed as exhogenous parameters to inside games, as in the following example:
 
@@ -360,34 +369,12 @@ In addition to the DSL defining the 'piping rules' between boxes, we provide som
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
 Branching is represented using the operator `+++`. So, for instance, if `SubGame1` is defined as ```branch1 +++ branch2```, then we are modelling a situation where `SubGame1` can actually evolve into two different games depending on input. As the input of a game can be the outcome of a strategic choice in some other game, this allows for flexible modelling of complex situations.
 
-Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used.
+Graphically, branching can be represented by resorting to [sheet diagrams](https://arxiv.org/abs/2010.13361), but as they are quite complicated to draw, this depiction is rarely used in practice.
 
-### Stochasticity
-
-Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
-
-Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
-
-A consequence of this is that deterministic strategic decisions (e.g. 'player chooses option A') must be lifted into the stochastic monad, getting thus transformed into their probabilistic equivalent (e.g. 'of all the option available, player chooses A with probability 1')
-
-A practical example of this can be found in `Strategies.hs`, where we have:
-
-```haskell
-acceptStrategy
-  :: Kleisli
-       Stochastic
-       (Transaction, HLContract, GasPrice)
-       AcceptDecisionSeller
-acceptStrategy = pureAction Accept
-```
-
-`pureAction` lifts the deterministic choice `Accept` to the corresponding concept in the probabilistic realm. 
-
-The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
 ### Supplying strategies
 
-The previous example `acceptStrategy` showed the general construction of a strategy for a single player. As usual in classical game theory, a strategy conditions on the observables and assigns a (possibly randomized) action. In the example above, the player observes the transaction, the hedger ledger contract, as well as the (initial) gas price, and then must assign an action (either accept or reject).
+As usual in classical game theory, a strategy conditions on the observables and assigns a (possibly randomized) action. 
 
 Every player who can make a decision in the game needs to be assigned a strategy. These individual strategies then get aggregated into a list representing the complete strategy for the whole game.
 
@@ -396,12 +383,40 @@ So, for instance, if our model consists of three subgames, a strategy for the wh
 ```haskell
 `strGame1 ::- strGame2 ::- strGame3 ::- Nil`.
 ```
-#### Branching
 
-To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`.  In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a repl (Cf. [Interactive Execution](#interactive-execution)) and give the command 'main'.
+#### Evaluating strategies
+
+To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`. In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a REPL (Cf. [Interactive Execution](#interactive-execution)) and give the command 'main'.
 You can make parametric changes in `Parametrization.hs` or even define new strategies and/or notions of equilibrium by editing `Stategies.hs` and `Analytics.hs`, respectively. Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
 
-As a word of caution, notice in a game with branching, we need to provide a possible strategy for each branch. For example, suppose to have the following game:
+
+#### Stochasticity
+
+Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
+
+Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
+
+A consequence of this is that deterministic strategic decisions (e.g. 'player chooses option A') must be lifted into the stochastic monad, getting thus transformed into their probabilistic equivalent (e.g. 'of all the options available, player chooses A with probability 1')
+
+A practical example of this is the following:
+
+```haskell
+strategyName
+  :: Kleisli
+       Stochastic
+       (Parameter1, Parameter2)
+       Decision
+acceptStrategy = pureAction Decision1
+```
+
+In the example above, the player observes some parameters (`Parameter1` and `Parameter2` in this particular case), and then must assign an action (in this case `Decision1`).
+
+`pureAction` lifts the deterministic choice `Decision1` to the corresponding concept in the probabilistic realm. 
+
+The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
+
+#### Branching
+As a word of caution notice that, in a game with branching, we need to provide a possible strategy for each branch. For example, suppose to have the following game:
 
 - Player 1 can choose between option A and B;
     - case A: Player 2 can choose between option A1 or A2;
@@ -414,9 +429,71 @@ Moreover, suppose that the payoffs are as follows:
 
 In this game the best strategy is clearly (A,A1). Nevertheless, we need to supply a strategy for Player2 also in the 'B' branch: Even if Player1 will never rationally choose B, Player2 needs to be endowed with a clear choice between B1 and B2 in case this happens.
 
-#### Strategies employed in the analysis
+## File structure
 
-Our analysis is focused on understanding when the targeted equilibrium, where the hedger ledger contract gets initiated and later published by the buyer as well as accepted and confirmed by the seller, can be supported. Concretely, this means we employ the following strategies:
+The model is composed of several files:
+
+- `app/Main.hs` contains all the main ingredients already set up for a run. Executing it will execute equilibrium checking on some of the most interesting strategies we defined. We suggest to start from here to get a feel of how the model analysis works.
+- `Model.hs` is the file where the main model is defined.
+- `Components.hs` is where the subgames making up the whole model are defined.
+- `Payoffs.hs` is where the payoff functions used in every subgame are defined. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
+- `Strategies.hs` is where the strategies we want to test are defined.
+- `Parametrization.hs` defines the concrete parametrizations used for the analysis: e.g. intrinsic utility of **Buyer**'s transaction, fixed costs for initiating a Ledger-Hedger contract etc.
+- `Types.hs` is where we define the types of the decisions to be taken (e.g. $Wait$ or $Initiate$ a Ledger-Hedger contract) and the types of `HLContract` and `Transaction`. Here we also define the types for payoffs, gas etc. These are all aliased to `Double`.
+- `ActionSpaces.hs` is mainly needed for technical type-transformations. It maps a player's decision type into the type needed to be fed in the subsequent game.
+- `Analytics.hs` defines the equilibrium notion for each game we want to test.
+- `Diagnostics.hs` is the file detailing which and how much information we want to show when strategies are tested.
+
+Relying on the DSL Primer, parsing the code structure should be a manageable task.
+
+
+# Analytics
+
+Now, we switch focus on *analytics*, which we defined as the set of techniques we employ to verify if and when a supplied results in an *equilibrium*. The notion of *equilibrium* we rely upon is the one of [Nash equilibrium](https://en.wikipedia.org/wiki/Nash_equilibrium), which intuitively describes a situation where, for each player, unilaterally deviating from the chosen strategy results in a loss.
+
+
+## Reading the analytics
+
+Analytics in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in eqilibrium`.
+
+For games with branching, there will also be a `NOTHING CASE`. To understand this, consider a game (call it `First Game`) that can trigger two different subgames (`Subgame branch 1`, `Subgame branch 2`, respectively) depending on the player's choice. Analytics would read like this:
+
+```
+ Game name
+First Game:
+
+ Strategies are in equilibrium
+Subgame branch 1:
+
+ NOTHING CASE
+Subgame branch 2:
+
+ Strategies are in equilibrium
+```
+
+Here `NOTHING CASE` signifies that the choice provided by the player results in not visiting `Subgame branch 1`, which is thus never played in this senario: Evidently, the choice made by the player in `First Game` resulting in the play continuing on `Subgame branch 2`.
+
+On the contrary, analytics become more expressive when the game is *not* in equilibrium. In this case, the engine will suggest a more profitable deviation by displaying the following prompt:
+
+```
+Strategies are NOT in equilibrium. Consider the following profitable deviations: 
+
+Player: 
+Optimal Move: 
+Current Strategy:
+Optimal Payoff: 
+Current Payoff: 
+Observable State:
+ --other game-- 
+ --No more information--
+```
+
+`Observable State` contains a dump of all the game parameters that are currenlty observable by all players. This is usually a lot of information, mainly useful for debugging purposes. All the other field names are pretty much self-describing. 
+
+
+## Strategies employed in the analysis
+
+Our analysis is focused on understanding when the targeted equilibrium - where the Ledger-Hedger contract gets initiated and later published by **Buyer** as well as accepted and confirmed by **Seller** - can be supported. Concretely, this means we employ the following strategies:
 
 ```haskell
 
@@ -491,70 +568,10 @@ noFulfillStrategyTarget
 noFulfillStrategyTarget = pureAction Exhaust
 ```
 
-### File structure
-
-The model is composed of several files:
-
-- `app/Main.hs` contains all the main ingredients already set up for a run. Executing it will execute equilibrium checking on some of the most interesting strategies we defined. We suggest to start from here to get a feel of how the model analysis works.
-- `Model.hs` is the file where the main model is defined.
-- `Components.hs` is where the subgames making up the whole model are defined.
-- `Payoffs.hs` is where the payoff functions used in every subgame are defined. We decided to keep them all in the same file to make tweaking and fine-tuning less dispersive.
-- `Strategies.hs` is where the strategies we want to test are defined.
-- `Parametrization.hs` defines the concrete parametrizations used for the analysis: e.g. intrinsic utility of **Buyer**'s transaction, fixed costs for initiating a Ledger-Hedger contract etc.
-- `Types.hs` is where we define the types of the decisions to be taken (e.g. $Wait$ or $Initiate$ a Ledger-Hedger contract) and the types of `HLContract` and `Transaction`. Here we also define the types for payoffs, gas etc. These are all aliased to `Double`.
-- `ActionSpaces.hs` is mainly needed for technical type-transformations. It maps a player's decision type into the type needed to be fed in the subsequent game.
-- `Analytics.hs` defines the equilibrium notion for each game we want to test.
-- `Diagnostics.hs` is the file detailing which and how much information we want to show when strategies are tested.
-
-Relying on the DSL Primer, parsing the code structure should be a manageable task.
-
-Moreover, the repository is split in two different branches:
-- In `main` we have the basic model, where both players are supposed to be risk-neutral. Here the code has less overhead and syntactic clutter so we strongly avice to start here to have a better understanding of the code.
-- In `utility-functions` we added two new functions, `utilityFunctionBuyer` and `utilityFunctionSeller`.
-Every game defined in `Model.hs` and `Components.hs` has been edited accordingly. The most important changes are in how `returns` is defined in many subcomponents. If before we had, say, 
-
 For more information about how to supply strategies and/or how to make changes, please refer to the section [Supplying Strategies](#supplying-strategies).
 
-## Reading the analytics
 
-Analytics in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in eqilibrium`.
-
-For games with branching, there will also be a `NOTHING CASE`. To understand this, consider a game (call it `First Game`) that can trigger two different subgames (`Subgame branch 1`, `Subgame branch 2`, respectively) depending on the player's choice. Analytics would read like this:
-
-```
- Game name
-First Game:
-
- Strategies are in equilibrium
-Subgame branch 1:
-
- NOTHING CASE
-Subgame branch 2:
-
- Strategies are in equilibrium
-```
-
-Here `NOTHING CASE` signifies that the choice provided by the player results in not visiting `Subgame branch 1`, which is thus never played in this senario: Evidently, the choice made by the player in `First Game` resulting in the play continuing on `Subgame branch 2`.
-
-On the contrary, analytics become more expressive when the game is *not* in equilibrium. In this case, the engine will suggest a more profitable deviation by displaying the following prompt:
-
-```
-Strategies are NOT in equilibrium. Consider the following profitable deviations: 
-
-Player: 
-Optimal Move: 
-Current Strategy:
-Optimal Payoff: 
-Current Payoff: 
-Observable State:
- --other game-- 
- --No more information--
-```
-
-`Observable State` contains a dump of all the game parameters that are currenlty observable by all players. This is usually a lot of information, mainly useful for debugging purposes. All the other field names are pretty much self-describing. 
-
-
-## Replicating the Ledger-Hedger Paper results 
+## Replicating the Ledger-Hedger paper results 
 
 To replicate the results claimed in the Ledger-Hedger paper, we instantiated the model with the following parameters (the instantiation can be found in `Parameters.hs`):
 
@@ -575,3 +592,56 @@ These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As
 
 As for future price distribution, we defined it as `testDistribution`: This is a normal distribution centered around the initial gas price. Again, we used the standard deviations suggested in the paper. Moreover, we defined `testActionSpaceGasPub`, representing the range in which $g_{pub}$ can swing. $g_{pub}$ is the gas consumed if **Buyer** decides to issue the transaction at market price, thus without resorting to Ledger-Hedger. In practice, we followed the paper and equated $g_{pub}$ and $g_{alloc}$, meaning that **Buyer** is using Ledger-Hedger to reserve the precise amount of gas needed to execute the transaction.
 
+As we already stated in [Summary - Analytics results](#analytics-results), we found that the equilibrium with this parameters is very brittle, and heavily relying on the risk-aversity of both **Buyer** and **Seller**. By this, we mean that the utility gain in using the Ledger-Hedger is really small, and even a small variation in the given parameters can result in equilibrium breaking.
+
+The reason why the protocol is so sensible is that, **Seller**-side, `payment` is several orders of magnitude smaller than the usage fees (`gasAccept`, `gasDone`). This immediately disincentivates **Seller** to use the protocol, as in terms of raw payoffs doing so results in a loss.
+
+Similarly, **Buyer**-side, the presence of a usage fee (`gasInitiation`) and the cost defined by`payment` immediately disincentivate **Buyer** to use the protocol.
+
+This 'operating at a loss' result is counterbalanced uniquely by the accentuated concavity of the utility functions provided. In a nutshell, both players are so risk-averse that they are willing to pay these huge premiums to protect themselves.
+
+Another reason why Ledger-Hedger is so sensible is also that players are fundamentally unbiased with respect to future gas price: it can go up or down, for both players, with equal probability. We are quite sure the situation would look different if players had private information available about future price distribution. Imagine the current situation:
+
+- **Seller** believes price will go sensibly down in the between blocks $start$ and $end$.
+- On the contrary, **Buyer** believes that price will go sensibly up within the same block interval.
+
+In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity all together: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
+
+## Other analyses
+
+We ran also some other analyses. First of all, and unsurprisingly, we found out that running the model with the following parameters results in a much bigger utility:
+
+| **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
+|:--------------:|:---------------------:|:-----------:|:----------:|
+| `wealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
+| `wealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract | $10^9$           |
+| `payment`      | payment               | The payment **Buyer** makes to **Seller** when LH contract is concluded. | $100$            |
+| `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
+| `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0$ |
+| `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $0$  |
+| `gasDone`      | $g_{done}$            | Cost of closing a LH contract. | $0$  |
+| `gasAllocTX`   | $g_{alloc}$           | Gas reserved in the LH contract. | $5 \cdot 10^6$   |
+| `gasPub`   | $g_{pub}$           | Gas size of the TX if issued at current market price. | $5 \cdot 10^6$   |
+
+This represents the scenario where we dispense of the platform fees altogether. Most likely, this scenario hadn't been considered in the original paper as the original work was meant to be part of some on-chain infrastructure. As such, what we call 'platform fees' would just be unavoidable smart contract execution costs.
+
+Keeping everything fixed, we then turned `payment` into a parameter. In the $\sqrt x$ case, we verified that in this setting the equilibrium is solid within the bound:
+
+$$x \leq \mathtt{payment} \leq y$$
+
+In the $\log(x)$ case, the bound is, instead:
+
+$$x \leq \mathtt{payment} \leq y$$
+
+That is, these represent the maximum and minimum `payment` parameters within which both **Buyer** and **Seller** judge using Ledger-Hedger convenient.
+
+
+Using both the original paper parameters and the 'zero fees' parameters, we then ran a multivariate analysis on player's risk aversity. In practice, we generalized the $\sqrt x$ function, up to now being used by both players, to the couple of functions
+
+$$\Large x^{y_{\mathbf{Buyer}}} \qquad x^{y_{\mathbf{Seller}}}$$
+
+Here, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
+Positive values $< 1$ represent risk-aversity ,$1$ represent risk-neutrality, while values $> 1$ signal risk-loving.
+
+The shaded region in the following graph represent where the equilibrium holds:
