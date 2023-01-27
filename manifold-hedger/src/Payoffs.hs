@@ -40,7 +40,7 @@ fulfillLHPayoffSeller wealthSeller (Transaction{..}, HLContract{..}, gasPub, pri
   case decision of
     Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
     Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
-    Confirm -> wealthSeller + payment + collateral + epsilon + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
+    Confirm -> wealthSeller + payment + collateral + epsilon + gasAllocTX*priceOld + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
   where
     costsAcceptance = ((-gasAccept) * priceOld) - collateral
 

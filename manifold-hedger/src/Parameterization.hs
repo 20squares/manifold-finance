@@ -48,8 +48,8 @@ testContract = HLContract
    100
    1
    (0.1*10**6)
-   (75*10**3)
-   (20*10**3)
+   0 -- (75*10**3)
+   0--(20*10**3)
 
 testTransaction = Transaction
   (5 * 10**6)
@@ -86,6 +86,6 @@ parameters distribution = Parameters
   testTransaction
   testContract
   100
-  logUtility
-  logUtility
+  id -- logUtility
+  id --logUtility
 
