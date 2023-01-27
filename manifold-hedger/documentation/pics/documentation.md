@@ -186,10 +186,6 @@ Moreover, we provide some *basic operations* to populate a box, namely:
 - A *stochastic distribution*, used to implement draws from nature.
 - A *strategic choice*, which can be thought of as a function parametrized over strategies.
 
-#### Supplying strategies
-
-*Strategies* are supplied as tuples, one for every subgame. So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a tuple `(strGame1,strGame2,strGame3)`.
-
 #### Branching
 
 Another important operation we provide is called *branching*. This is useful in contexts where, say, a player choice determines which subgame is going to be played next.
@@ -205,7 +201,7 @@ Practically, this is obtained by relying on the [Haskell Stochastic Package](htt
 
 A consequence of this is that deterministic strategic decisions (e.g. 'player chooses option A') must be lifted into the stochastic monad, getting thus transformed into their probabilistic equivalent (e.g. 'of all the option available, player chooses A with probability 1')
 
-A practical example of this can be found in `Analytics.hs`, where we have:
+A practical example of this can be found in `Strategies.hs`, where we have:
 
 ```haskell
 acceptStrategy
@@ -216,13 +212,95 @@ acceptStrategy
 acceptStrategy = pureAction Accept
 ```
 
-`pureAction` lifts the deterministic choice `Accept` to the corresponding concept in the probabilistic realm.
+`pureAction` lifts the deterministic choice `Accept` to the corresponding concept in the probabilistic realm. 
 
 The upside of assuming this little amount of overhead is that switching from pure to mixed strategies can be easily done on the fly, without having to change the model beforehand.
 
-Our analysis is focused on understanding when the targeted equilibrium, where the hedger ledger contract gets initiated and later published by the buyer as well as accepted and confirmed by the seller, can be supported. Concretely, this means:
+#### Supplying strategies
 
+The previous example `acceptStrategy` showed the general construction of a strategy for a single player. As usual in classical game theory, a strategy conditions on the observables and assigns a (possibly randomized) action. In the example above, the player observes the transaction, the hedger ledger contract, as well as the (initial) gas price, and then must assign an action (either accept or reject).
 
+Every player who can make a decision in the game needs to be assigned a strategy. These individual strategies then get aggregated into a list representing the complete strategy for the whole game.
+
+So, for instance, if our model consists of three subgames, a strategy for the whole model will just be a list:
+
+```haskell
+`strGame1 ::- strGame2 ::- strGame3 ::- Nil`.
+```
+Our analysis is focused on understanding when the targeted equilibrium, where the hedger ledger contract gets initiated and later published by the buyer as well as accepted and confirmed by the seller, can be supported. Concretely, this means we employ the following strategies:
+
+```haskell
+
+-- | initiate contract strategy 
+initiateStrategyBuyerTarget
+  :: Kleisli
+           Stochastic
+           (Transaction, HLContract, GasPrice)
+           (InitialDecisionBuyer HLContract)
+initiateStrategyBuyerTarget =
+  Kleisli (\(_,contract,_) -> playDeterministically $ Initiate contract)
+
+-- | publish strategy if no LH
+noLHPublishStrategyTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, GasPrice)
+       (PublishDecision Double)
+noLHPublishStrategyTarget = pureAction $ Publish 0.0
+
+-- | accept decision seller
+acceptStrategyTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, HLContract, GasPrice)
+       AcceptDecisionSeller
+acceptStrategyTarget = pureAction Accept
+
+-- | recoup strategy buyer
+recoupStrategyTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, HLContract, GasPrice)
+       RecoupDecisionBuyer
+recoupStrategyTarget = pureAction Refund
+
+-- | publish strategy part 1 if LH
+lhPublishStrategyPart1Target
+  :: Kleisli
+       Stochastic
+       GasPrice
+       (PublishDecision Double)
+lhPublishStrategyPart1Target =  pureAction $ Publish 0.0
+
+-- | publish strategy part 2 if LH
+lhPublishStrategyPart2Target
+  ::  Kleisli
+          Stochastic
+          (GasPrice, Transaction, PublishDecision a1)
+          (PublishDecision Gas)
+lhPublishStrategyPart2Target =
+  Kleisli
+   (\(pi,tx,publishDecision) -> 
+        case publishDecision of
+          NoOp -> playDeterministically NoOp
+          Publish _ -> playDeterministically $ Publish $ gasAllocTX tx)
+
+-- | fulfill strategy
+fulfillStrategyTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, HLContract, GasPrice, Gas)
+       FulfillDecisionSeller
+fulfillStrategyTarget = pureAction Confirm
+
+-- | noFulfill strategy
+noFulfillStrategyTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, HLContract, GasPrice)
+       FulfillDecisionSeller
+noFulfillStrategyTarget = pureAction Exhaust
+```
 
 ### File structure
 
