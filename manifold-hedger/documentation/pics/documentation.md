@@ -34,23 +34,23 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 
 A more detailed analysis can be found in the section:
 
-First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. In general, this is a sympthom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
+First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail. This is a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
 
 - The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**.
 - In the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
 
 So, just considering this, **Seller** incurs a cost that is **4** orders of magnitude higher than the price paid by **Buyer**. This choice of parameters makes the protocol extremely fragile, something that is counteracted only by the fact that we are using very concave utility functions, which represent quite high risk-aversity.
 
-Indeed, we find out that in a risk-neutral scenario there is no difference between using or not using Ledger-Hedger *if and only if* the usage fees and payments are *both* set to **0**, meaning that the protocol is essentially 'free to use for everyone'.
+Indeed, in a risk-neutral scenario there is no difference between using or not using Ledger-Hedger *if and only if* the usage fees and payments are *both* set to **0**, meaning that the protocol is essentially 'free to use for everyone'.
 
 Summarizing, our main findings are the following:
 - Running the protocol with the parameters provided in the paper makes no sense, as the advantage in using Ledger-Hedger is very low even for very risk-averse players.
-- Using Ledger-Hedger makes players incur in extra costs: **Seller** pays a fee for using the platform, whereas **Buyer** pays a (smaller) fee for using the platform *and* has also to pay **Seller** a price premium.
+- Using Ledger-Hedger makes players incur  extra costs: **Seller** pays a fee for using the platform, whereas **Buyer** pays a (smaller) fee for using the platform *and* has also to pay **Seller** a price premium.
 - These expenses are only offset by the risk-aversity of the players. The more risk-averse they are, the more it makes sense for them to carry these extra costs.
 - Varying the price parameter won't help much, as price constitutes revenue for **Seller** but a cost for **Buyer**. So the more we make it convenient for the former, the less we make it convenient for the latter, and vice-versa.
 - As it is instantiated, the protocol is so brittle that even small changes in the standard deviation of future gas price distribution disturb the equilibrium.
-- To make the protocol more robust, the only viable option is lowering the fees for the usage of the platform, which constitute a cost both for **Buyer** and for **Seller**. 
-- Finally, we hypothesize that the situation could change if **Buyer** and **Seller** have private information about the future gas price distribution. That is, the future gas price distribution is not anymore assumed to be a normal curve centered around the current price. This has not been simulated yet, as it was not included in the current working package.
+- To make the protocol more robust, the only viable option is lowering the fees for the usage of the platform, which constitute a cost both for **Buyer** and for **Seller**.
+- Finally, we hypothesize that the situation could change if **Buyer** and **Seller** have differential, private information about the future gas price distribution. That is, the future gas price distribution is not anymore assumed to be a normal curve centered around the current price. This has not been simulated yet, as it was not included in the current working package.
 
 
 # Installation
@@ -62,6 +62,7 @@ There are two main ways of running the model: normal and interactive execution.
 ## Normal execution
 
 To 'just' run the model, type
+
 ```sh
 stack run
 ```
@@ -90,11 +91,9 @@ Of these commands, `:t` is the most important one, as it allows to visualize cle
 ```haskell
 (&&) :: Bool -> Bool -> Bool
 ```
-
 Which tells us that `(&&)` - the logical `and` operator - takes a boolean (a truth value), than another boolean, and returns a boolean (the logical and of the first two).
 
-Since under the hood games are nothing more than functions, REPL allows us to see the game type by doing 
-`:t gameName`. If the game is parametrized, say, over a string, then `:t gameName "string"` will return the type where the first component has already been filled.
+Since under the hood games are nothing more than functions, REPL allows us to see the game type by doing `:t gameName`. If the game is parametrized, say, over a string, then `:t gameName "string"` will return the type where the first component has already been filled.
 
 This tool is expecially powerful to better understand the structure of the strategies we have to feed to the model, which can grow very complicated as the model scales.
 
@@ -125,16 +124,16 @@ these errors hint at missing GCC library, which will have to be installed indepe
 
 
 # Explaining the model
-Here we give a more detailed explanation of what our model does. 
+
+Here we give a more detailed explanation of what our model does.
 
 ## Recap: The Ledger-Hedger paper
 As our model is based on the Ledger-Hedger paper, we start by briefly recalling the main highlights of this work.
 
 [Ledger Hedger](https://eprint.iacr.org/2022/056.pdf) is a game-theoretic mechanism for gas price reservation. *Gas size* denotes the amount of computational work needed to execute a given function in a smart contract. For instance, in the Ethereum ecosystem every EVM instruction has a fixed gas size. As the blockspace demand varies overtime, transaction issuers dynamically specify the fees they are willing to pay to get their transactions included by providing a *gas price*: The total amount the issuer will pay to the miner (or whatever equivalent role a given blockchain provides) for a given transaction to be executed is then determined as the product between gas size and gas price.
 
-The fact that gas price varies with market conditions, generally rising when demand is high and falling when it's not, can be a problem for some transaction issuers, that would like to reserve a fixed gas price beforehand. Similarly, it can be a problem for miners, that may be unable to forecast their future profits. Ledger Hedger provides a mechanism to address this problem. We consider a system with two participants:
-
 ### Ledger-Hedger: Players and phases
+
 The fact that gas price varies with market conditions, generally rising when demand is high and falling when demand is low, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, this can be a problem for miners, which may be unable to forecast their future profits. Ledger-Hedger provides a mechanism to address this problem. We consider a system with two participants:
 
 - **Buyer**, that wants to issue a given transaction in a future block interval $start<end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
@@ -150,6 +149,7 @@ Let us give a more detailed view of all the moving components in this picture.
 - Phase II happens within the block interval $start<end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and in which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
 
 ### Ledger-Hedger: The subgame space
+
 Let us now describe the subgame space:
 - **InitLH** is where **Buyer** can decide to either use or not use Leger-Hedger.
     - In the former case ($Wait$), **Buyer** just has to wait until $start$;
@@ -181,13 +181,14 @@ Let us now describe the subgame space:
 
 ## Assumptions made explicit
 
-In formalizing Ledger-Hedger, we had to make some assumptions,that were kept implicit in the paper, more explicit.
+In formalizing Ledger-Hedger, we had to make some assumptions, that were kept implicit in the paper, more explicit.
 
 ### Refined payoffs
 
 First of all, the payoff types had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. This is represents the desire for **Buyer** to see the transaction included in a block and is one of the main driver to use Ledger-Hedger in the first place. 
 
 In our model, a transaction is defined as a record of type:
+
 ``` haskell
 data Transaction = Transaction
 { gasAllocTX    :: Gas
@@ -205,6 +206,7 @@ In the first case, payoffs can become negative at some stages of the game: For i
 Still, adding payoffs as things progress can cause problems when one notices that the utility functions representing risk-aversion - namely `sqrt` and `log` - are well-defined only for positive numbers. To avoid this inconsistency problems we opted for calculating payoffs only when the end of a branch is reached. We also think that this represents better rational players, which are able to reason about the game until 'the very end'.
 
 ### Service costs
+
 In the paper, actions such as **Initiate** or **Accept** have a cost, which is expressed in gas units. This makes sense as the paper is aimed at providing on-chain gas price reservation mechanisms. We incorporated these costs in the Ledger-Hedger contract type, defined as the following record:
 
 ``` haskell
@@ -315,7 +317,8 @@ gameName variables = [opengame|
 In turn, `Subgame1` and `Subgame2` can be other games defined using the same DSL. Notice that the wire `x` is internal and totally hidden from the 'outside world'. 
 
 ### Exhogenous parameters
-An exhogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exhogenous parameters could be the market conditions at the time when a game is played.
+
+An exogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exhogenous parameters could be the market conditions at the time when a game is played.
 
 Exhogenous parameters are just defined as variables, as the field `variables` in the previous code blocks testifes. These variables can in turn be fed as exhogenous parameters to inside games, as in the following example:
 
@@ -514,7 +517,7 @@ For more information about how to supply strategies and/or how to make changes, 
 
 ## Reading the analytics
 
-Analitycs in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in eqilibrium`.
+Analytics in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in eqilibrium`.
 
 For games with branching, there will also be a `NOTHING CASE`. To understand this, consider a game (call it `First Game`) that can trigger two different subgames (`Subgame branch 1`, `Subgame branch 2`, respectively) depending on the player's choice. Analytics would read like this:
 
