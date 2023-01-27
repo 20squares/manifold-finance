@@ -33,6 +33,7 @@ library
       Parameterization
       Payoffs
       Strategies
+      TestGame
       Types
   other-modules:
       Paths_manifold_hedger
@@ -41,8 +42,13 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , cassava
     , open-games-hs
+    , path
+    , path-io
     , probability
+    , vector
   default-language: Haskell2010
 
 executable manifold-hedger-exe
@@ -54,23 +60,34 @@ executable manifold-hedger-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , cassava
     , manifold-hedger
     , open-games-hs
+    , path
+    , path-io
     , probability
+    , vector
   default-language: Haskell2010
 
 test-suite manifold-hedger-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ExpectedUtilitySpec
       Paths_manifold_hedger
   hs-source-dirs:
       src/test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , cassava
     , hspec
     , manifold-hedger
     , open-games-hs
+    , path
+    , path-io
     , probability
+    , vector
   default-language: Haskell2010
