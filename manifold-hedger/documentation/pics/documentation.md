@@ -641,7 +641,10 @@ Using both the original paper parameters and the 'zero fees' parameters, we then
 
 $$\Large x^{y_{\mathbf{Buyer}}} \qquad x^{y_{\mathbf{Seller}}}$$
 
-Here, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
+The concavity/convexity of these functions is dependent on the value of $y$, as shown in the following chart:
+![Alt text](x_exp_y.png)
+
+Thus, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
 Positive values $< 1$ represent risk-aversity ,$1$ represent risk-neutrality, while values $> 1$ signal risk-loving.
 
-The shaded region in the following graph represent where the equilibrium holds:
+Keeping all parameters fixed, the shaded region in the following graph represent where the equilibrium holds:
