@@ -66,8 +66,8 @@ interactiveMain payment utilityParameterBuyer utilityParameterSeller = do
     Right probDist ->  do
         putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0  2.0 2.0))
+            ls = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 utilityParameterBuyer utilityParameterSeller))
         print ls
         putStrLn "Evaluation of risk parameters with LH paper costs"                  
-        let ls' = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment (75*10**3) (20*10**3)  2.0 2.0))
+        let ls' = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment (75*10**3) (20*10**3) utilityParameterBuyer utilityParameterSeller))
         print ls'
