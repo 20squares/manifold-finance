@@ -80,7 +80,7 @@ exponentialUtility par x = x**(1/par)
 
 -------------------------
 -- 5. Complete parameters
-parameters distribution payment gAccept gDone exponential  = Parameters
+parameters distribution payment gAccept gDone exponentialBuyer exponentialSeller  = Parameters
   "buyer"
   "seller"
   (10**9)
@@ -90,6 +90,6 @@ parameters distribution payment gAccept gDone exponential  = Parameters
   testTransaction
   (testContract payment gAccept gDone)
   100
-  (exponentialUtility exponential)
-  (exponentialUtility exponential)
+  (exponentialUtility exponentialBuyer)
+  (exponentialUtility exponentialSeller)
 

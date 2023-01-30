@@ -51,9 +51,9 @@ main = do
     Right probDist ->  do
         putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0  2.0))) lsPaymentsToCheck
+            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0  2.0 2.0))) lsPaymentsToCheck
         print ls
         putStrLn "Evaluation of risk parameters for exponential utility"
-        let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (75*10**3) (20*10**3) utilityParameter))) lsUtilityParameters
+        let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (75*10**3) (20*10**3) utilityParameter utilityParameter))) lsUtilityParameters
         print ls'
 
