@@ -139,6 +139,7 @@ noFulfillLHPayoffSeller wealthSeller ( Transaction{..}, HLContract{..}, priceNew
         --                           ^^ buyer can still do the transaction if it is worth it
         -- Confirm: wealthBuyer - (payment + epsilon + gasInit * priceOld)
         --                           ^^ initiation costs of the contract
+        --                      + utilityFromTX 
 fulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice,GasPrice,FulfillDecisionSeller) -> PayoffHL
 fulfillLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
   case decision of
