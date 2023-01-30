@@ -1,9 +1,16 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Types
   where
+
+
+import qualified Data.ByteString.Lazy as L
+import           Data.Csv
+import           Data.Vector
+import           GHC.Generics
 
 import OpenGames.Engine.Engine
 
@@ -38,6 +45,8 @@ type Gas        = Double
 type GasPrice   = Double
 type Utility    = Double
 
+newtype GasPriceNew = GasPriceNew Double
+
 -- | HL contract
 data HLContract = HLContract
   { collateral    :: Collateral
@@ -49,7 +58,7 @@ data HLContract = HLContract
   } deriving (Eq,Show,Ord)
 
 -- | Transaction that the buyer wants to get implemented
--- TODO: we assume that gasAllocTX are known at the beginning here
+-- NOTE: we assume that gasAllocTX are known at the beginning here
 data Transaction = Transaction
   { gasAllocTX    :: Gas
   , utilityFromTX :: Utility
@@ -75,6 +84,18 @@ data Parameters = Parameters
   , utilityFunctionSeller :: UtilityFunction
   }
 
+-- 5. Import distribution
+
+type ProbabilityMass = Double
+
+data ImportProbabilityTuple = ImportProbabilityTuple
+  { value :: GasPrice
+  , probMass :: ProbabilityMass
+  } deriving (Generic,Show)
+
+instance FromNamedRecord ImportProbabilityTuple
+instance DefaultOrdered ImportProbabilityTuple
+
 -- 5. strategies
 -- | Define general strategy type for constructing the relevant subgame strategies
 -- Should avoid accidental misspecifications
@@ -94,7 +115,7 @@ data Strategy a = Strategy
                                 AcceptDecisionSeller
   , recoupStrategy         :: Kleisli
                                 Stochastic
-                                (Transaction, HLContract, GasPrice)
+                                (Transaction, HLContract, GasPrice, GasPrice)
                                 RecoupDecisionBuyer
   , lhPublishStrategyPart1 :: Kleisli
                                 Stochastic
@@ -106,11 +127,11 @@ data Strategy a = Strategy
                                 (PublishDecision Gas)
   , fulfillStrategy        :: Kleisli
                                 Stochastic
-                                (Transaction, HLContract, GasPrice, Gas)
+                                (Transaction, HLContract, GasPrice, GasPrice, Gas)
                                 FulfillDecisionSeller
   , noFulfillStrategy      :: Kleisli
                                 Stochastic
-                                (Transaction, HLContract, GasPrice)
+                                (Transaction, HLContract, GasPrice, GasPrice)
                                 FulfillDecisionSeller
   } 
 

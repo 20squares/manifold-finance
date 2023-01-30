@@ -48,7 +48,7 @@ acceptStrategyTarget = pureAction Accept
 recoupStrategyTarget
   :: Kleisli
        Stochastic
-       (Transaction, HLContract, GasPrice)
+       (Transaction, HLContract, GasPrice, GasPrice)
        RecoupDecisionBuyer
 recoupStrategyTarget = pureAction Refund
 
@@ -77,7 +77,7 @@ lhPublishStrategyPart2Target =
 fulfillStrategyTarget
   :: Kleisli
        Stochastic
-       (Transaction, HLContract, GasPrice, Gas)
+       (Transaction, HLContract, GasPrice,GasPrice, Gas)
        FulfillDecisionSeller
 fulfillStrategyTarget = pureAction Confirm
 
@@ -85,7 +85,7 @@ fulfillStrategyTarget = pureAction Confirm
 noFulfillStrategyTarget
   :: Kleisli
        Stochastic
-       (Transaction, HLContract, GasPrice)
+       (Transaction, HLContract, GasPrice, GasPrice)
        FulfillDecisionSeller
 noFulfillStrategyTarget = pureAction Exhaust
 

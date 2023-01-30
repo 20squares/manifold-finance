@@ -23,21 +23,21 @@ We begin "backwards" by considering the last states first
 --------------
 -- 1. Subgames
 -- | Initiate ~> Accepted ~> Publish subgame
-publishSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
+publishSubgame  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx, contract ;
-   feedback  : ;
+   inputs    : tx, contract,piOld ;
+   feedback  : utilityBuyer2,utilitySeller2;
 
    :----------------------------:
-   inputs    : tx, contract ;
-   feedback  : ;
-   operation : publishLHBuyerRandom buyerName distribution  possibleGasPubLS;
+   inputs    : tx, contract,piOld ;
+   feedback  : utilityBuyer2,utilitySeller2;
+   operation : publishLHBuyerRandom distribution  possibleGasPubLS;
    outputs   : publishDecisionGame ;
-   returns   :  ;
+   returns   : utilityBuyer,utilitySeller;
 
    inputs    : publishDecisionGame ;
-   feedback  : ;
-   operation : publishBranching buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller ;
+   feedback  : utilityBuyer,utilitySeller;
+   operation : publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller ;
    outputs   : fulfillDecision ;
    returns   :  ;
 
@@ -47,24 +47,24 @@ publishSubgame buyerName sellerName wealthBuyer wealthSeller distribution possib
    returns   : ;
   |]
  where
-   publishBranching buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller  = (fulfillLHSellerPublished buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller) +++ (fulfillLHSellerNoOp buyerName sellerName wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller)
+   publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller  = (fulfillLHSellerPublished wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller) +++ (fulfillLHSellerNoOp wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller)
 
 -- | Initiate ~> Accepted subgame
-acceptSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
+acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx, contract,piInitial ;
-   feedback  : ;
+   inputs    : tx, contract,piOld ;
+   feedback  : utilityBuyer;
 
    :----------------------------:
-   inputs    : tx, contract,piInitial ;
+   inputs    : tx, contract,piOld ;
    feedback  : ;
-   operation : acceptLHSeller sellerName wealthSeller utilityFunctionSeller;
+   operation : acceptLHSeller  ;
    outputs   : acceptanceDecisionGame ;
-   returns   :  ;
+   returns   : utilitySeller ;
 
    inputs    : acceptanceDecisionGame ;
-   feedback  : ;
-   operation : acceptBranching buyerName sellerName  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller;
+   feedback  : utilityBuyer,utilitySeller;
+   operation : acceptBranching wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller;
    outputs   : discard;
    returns   : ;
 
@@ -74,26 +74,24 @@ acceptSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibl
    returns   : ;
   |]
  where
-   acceptBranching  buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = (recoupLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (publishSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
-
-
+   acceptBranching  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = (recoupLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (publishSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
 
 -- | Complete game
-completeGame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
+completeGame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
-   inputs    : tx,contract,piInitial ;
+   inputs    : tx,contract,piOld ;
    feedback  : ;
 
    :----------------------------:
-   inputs    : tx,contract,piInitial ;
+   inputs    : tx,contract,piOld ;
    feedback  : ;
-   operation : initLHBuyer buyerName wealthBuyer utilityFunctionBuyer;
+   operation : initLHBuyer  ;
    outputs   : contractDecisionGame ;
-   returns   :  ;
+   returns   : utilityBuyer ;
 
    inputs    : contractDecisionGame ;
-   feedback  : ;
-   operation : completeBranching buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller;
+   feedback  : utilityBuyer;
+   operation : completeBranching   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller;
    outputs   : discard;
    returns   : ;
 
@@ -103,7 +101,6 @@ completeGame buyerName sellerName wealthBuyer wealthSeller distribution possible
    returns   :  ;
   |]
   where
-    completeBranching buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller = (noLHBuyerRandom buyerName sellerName wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (acceptSubgame buyerName sellerName wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
-
+    completeBranching   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller = (noLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
 
 
