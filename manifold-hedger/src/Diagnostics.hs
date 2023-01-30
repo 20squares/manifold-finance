@@ -16,7 +16,7 @@ Defines hand-rolled diagnostics for ease of analysis
 -}
 
 --------------------------
--- 0. Show all diagnostics
+-- 1. Show all diagnostics
 showDiagnosticInfo :: (Show y, Ord y, Show x) => DiagnosticInfoBayesian x y -> String
 showDiagnosticInfo info =  
      "\n"    ++ "Player: " ++ player info
@@ -85,5 +85,33 @@ checkEqMaybe3L ls =
   case ls of
     Just ls' -> checkEqMaybe2L ls' 
     Nothing  -> "\n NOTHING CASE"
-   
+
+--------------------------------
+-- 3. Output equilibrium info for breaking information 
+-- Equilibrium or not
+toEquilibriumL :: (Show y, Ord y, Show x) => [DiagnosticInfoBayesian x y] -> Bool
+toEquilibriumL = and . fmap equilibrium
+
+-- checks equilibrium for the branching case
+-- checks equilibrium and if not outputs relevant deviations
+toEquilibriumMaybeL :: (Show y, Ord y, Show x) => Maybe [DiagnosticInfoBayesian x y] -> Bool
+toEquilibriumMaybeL ls =
+  case ls of
+    Just ls' -> toEquilibriumL ls'
+    Nothing  -> True
+
+ -- checks equilibrium for the branching case -  one level nested 
+toEquilibriumMaybe2L :: (Show y, Ord y, Show x) => Maybe (Maybe [DiagnosticInfoBayesian x y]) -> Bool
+toEquilibriumMaybe2L ls =
+  case ls of
+    Just ls' -> toEquilibriumMaybeL ls' 
+    Nothing  -> True
+
+ -- checks equilibrium for the branching case -  two level nested 
+toEquilibriumMaybe3L :: (Show y, Ord y, Show x) => Maybe (Maybe (Maybe [DiagnosticInfoBayesian x y])) -> Bool
+toEquilibriumMaybe3L ls =
+  case ls of
+    Just ls' -> toEquilibriumMaybe2L ls' 
+    Nothing  -> True
+
 

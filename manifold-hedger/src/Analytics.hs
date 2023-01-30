@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds #-}
 
 module Analytics
   where
@@ -137,3 +138,22 @@ printOutputPublishSubgame strategy parameters = do
   putStrLn "NoFulfill Decision by Seller:"
   putStrLn $ showDiagnosticInfoMaybeL seller8
 
+-- 4. Outputting only Bool info for equilibrium breaking
+-- | Hand-rolling the specific output type for complete game
+breakEquilibriumCompleteGame strategy parameters =
+  let buyer1 ::- buyer2 ::- seller3 ::- buyer4 ::- buyer5 ::- buyer6 ::- seller7 ::- seller8 ::- Nil = equilibriumCompleteGame strategy parameters
+      ls = [toEquilibriumL buyer1, toEquilibriumMaybeL buyer2, toEquilibriumMaybeL seller3, toEquilibriumMaybe2L buyer4, toEquilibriumMaybe2L buyer5, toEquilibriumMaybe2L buyer6, toEquilibriumMaybe3L seller7, toEquilibriumMaybe3L seller8]
+      in and ls
+
+
+-- | Hand-rolling the specific output type for accept subgame
+breakEquilibriumAcceptSubgame strategy parameters =
+  let seller3 ::- buyer4 ::- buyer5 ::- buyer6 ::- seller7 ::- seller8 ::- Nil = equilibriumAcceptSubGame strategy parameters
+      ls = [toEquilibriumL seller3, toEquilibriumMaybeL buyer4, toEquilibriumMaybeL buyer5, toEquilibriumMaybeL buyer6, toEquilibriumMaybe2L seller7, toEquilibriumMaybe2L seller8]
+      in and ls
+
+-- | Hand-rolling the specific output type for publish subgame
+breakEquilibriumPublishSubgame strategy parameters =
+  let  buyer5 ::- buyer6 ::- seller7 ::- seller8 ::- Nil = equilibriumPublishSubGame strategy parameters
+       ls = [toEquilibriumL buyer5, toEquilibriumL buyer6, toEquilibriumMaybeL seller7, toEquilibriumMaybeL seller8]
+       in and ls

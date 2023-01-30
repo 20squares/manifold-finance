@@ -23,7 +23,12 @@ import qualified Path.IO as IO
 dirProbability = [reldir|probability|]
 distributionFile = [relfile|distribution.csv|]
 
-  
+-- | List of payments to check
+lsPaymentsToCheck = [0, -10**1, -10**2, -10**3, -10**4,-10**5, -10**6, -10**7, -10**8]
+
+-- | List of exponential utility parameters to check
+lsUtilityParameters = [1,1.1..2.0]
+
 -- | File
 importProbDistFile
   :: FilePath
@@ -37,11 +42,6 @@ importProbDistFile filePath = do
     Left x -> pure $ Left x
     Right (_,vector) -> pure $ Right $ fromVectorToProbDist vector
 
-
-
-  
---importFile = do
---  scenario <- importProbDistFile $ toFilePath $ dirSpecificationSimulation </> specificationFile
 -- 2. main executable
 main :: IO ()
 main = do
@@ -49,13 +49,11 @@ main = do
   case distribution of
     Left x -> print x
     Right probDist ->  do
-        putStrLn "EVALUATION OF GAME"
+        putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-        putStrLn "\n COMPLETE GAME"
-        printEquilibriumCompleteGame strategyComplete (parameters probDist)
-        putStrLn "\n ACCEPT SUBGAME"
-        printEquilibriumAcceptSubgame strategyAccept (parameters probDist)
-        putStrLn "\n PUBLISH SUBGAME"
-        printEquilibriumPublishSubgame strategyPublish (parameters probDist)
-
+            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0  2.0))) lsPaymentsToCheck
+        print ls
+        putStrLn "Evaluation of risk parameters for exponential utility"
+        let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (75*10**3) (20*10**3) utilityParameter))) lsUtilityParameters
+        print ls'
 
