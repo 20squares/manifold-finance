@@ -25,7 +25,8 @@ recoupLHPayoffSeller = noLHPayoffSeller
 recoupLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, RecoupDecisionBuyer) ->  PayoffHL
 recoupLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
   case decision of
-    Refund  -> wealthBuyer + payment + epsilon - priceNew * gasDone + costsInitialization
+    Refund  -> wealthBuyer + payment + epsilon + maximum [0,netUtility] - priceNew * gasDone + costsInitialization
+    -- Refund  -> wealthBuyer + payment + epsilon - priceNew * gasDone + costsInitialization
     Forfeit -> wealthBuyer + maximum [0,netUtility] + costsInitialization
   where
     netUtility = utilityFromTX - (gasAllocTX * priceNew)
@@ -39,7 +40,8 @@ fulfillLHPayoffSeller wealthSeller (Transaction{..}, HLContract{..}, gasPub, pri
   case decision of
     Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
     Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
-    Confirm -> wealthSeller + payment + collateral + epsilon + gasAllocTX*priceOld + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
+    Confirm -> wealthSeller + payment + collateral + epsilon + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
+    --Confirm -> wealthSeller + payment + collateral + epsilon + gasAllocTX*priceOld + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
   where
     costsAcceptance = ((-gasAccept) * priceOld) - collateral
 

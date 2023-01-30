@@ -145,7 +145,6 @@ breakEquilibriumCompleteGame strategy parameters =
       ls = [toEquilibriumL buyer1, toEquilibriumMaybeL buyer2, toEquilibriumMaybeL seller3, toEquilibriumMaybe2L buyer4, toEquilibriumMaybe2L buyer5, toEquilibriumMaybe2L buyer6, toEquilibriumMaybe3L seller7, toEquilibriumMaybe3L seller8]
       in and ls
 
-
 -- | Hand-rolling the specific output type for accept subgame
 breakEquilibriumAcceptSubgame strategy parameters =
   let seller3 ::- buyer4 ::- buyer5 ::- buyer6 ::- seller7 ::- seller8 ::- Nil = equilibriumAcceptSubGame strategy parameters
