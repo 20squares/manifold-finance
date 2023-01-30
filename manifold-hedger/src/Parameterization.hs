@@ -43,11 +43,11 @@ testStrategyTupleTarget = completeStrategy testStrategy
 ------------------------------
 -- 2. Contract Parameters used
 
-testContract payment gAccept gDone = HLContract
+testContract payment gInit gAccept gDone = HLContract
    (10**9)
    payment
    1
-   (0.1*10**6)
+   gInit   -- NOTE: paper (0.1*10**6)
    gAccept -- NOTE: paper (75*10**3)
    gDone   -- NOTE: paper (20*10**3)
 
@@ -80,7 +80,7 @@ exponentialUtility par x = x**(1/par)
 
 -------------------------
 -- 5. Complete parameters
-parameters distribution payment gAccept gDone exponentialBuyer exponentialSeller  = Parameters
+parameters distribution payment gInit gAccept gDone exponentialBuyer exponentialSeller  = Parameters
   "buyer"
   "seller"
   (10**9)
@@ -88,8 +88,7 @@ parameters distribution payment gAccept gDone exponentialBuyer exponentialSeller
   distribution
   testActionSpaceGasPub
   testTransaction
-  (testContract payment gAccept gDone)
+  (testContract payment gInit gAccept gDone)
   100
   (exponentialUtility exponentialBuyer)
   (exponentialUtility exponentialSeller)
-

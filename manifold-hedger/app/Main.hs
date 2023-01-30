@@ -51,10 +51,10 @@ main = do
     Right probDist ->  do
         putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0  2.0 2.0))) lsPaymentsToCheck
+            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 0  2.0 2.0))) lsPaymentsToCheck
         print ls
         putStrLn "Evaluation of risk parameters for exponential utility"
-        let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (75*10**3) (20*10**3) utilityParameter utilityParameter))) lsUtilityParameters
+        let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (0.1*10**6) (75*10**3) (20*10**3) utilityParameter utilityParameter))) lsUtilityParameters
         print ls'
 
 -- 3. main for the interactive version
@@ -66,8 +66,8 @@ interactiveMain payment utilityParameterBuyer utilityParameterSeller = do
     Right probDist ->  do
         putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 utilityParameterBuyer utilityParameterSeller))
+            ls = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 0 utilityParameterBuyer utilityParameterSeller))
         print ls
         putStrLn "Evaluation of risk parameters with LH paper costs"                  
-        let ls' = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment (75*10**3) (20*10**3) utilityParameterBuyer utilityParameterSeller))
+        let ls' = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment (0.1*10**6) (75*10**3) (20*10**3) utilityParameterBuyer utilityParameterSeller))
         print ls'
