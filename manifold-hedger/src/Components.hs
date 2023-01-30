@@ -17,14 +17,6 @@ import Types
 This file contains the main model components
 -}
 
--- NOTE We assume the contract as given; there is no need to optimize over the contract in the first step; can be changed later. 
--- NOTE We assume that the main relevance for manifold is to decide the seller decision; no need to extensively optimize over buyer decision to choose a contract; we need to think this through
--- NOTE We ignore blockinformation for now; this seems like something that can be abstracted away in the concerns made in this paper here
--- NOTE The utility assumption on the player might require private information; need to think about this as well
--- TODO Check the exact deliverable format
--- TODO Construct the overall game with an eye on having differential information for the different players: The best way probably would be for the seller to observe something initially which affects the distribution at time T. So that the probability distribution is a stochastic channel.
--- TODO This also needs to be constructed with the possibility of importing information from the outset.
--- TODO Run primitive analysis and verify existing results
 --------------------
 -- 1. Representation
 -- 1.1. Nature

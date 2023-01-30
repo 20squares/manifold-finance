@@ -49,8 +49,6 @@ publishSubgame  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFu
  where
    publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller  = (fulfillLHSellerPublished wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller) +++ (fulfillLHSellerNoOp wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller)
 
-
-
 -- | Initiate ~> Accepted subgame
 acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
 
@@ -77,8 +75,6 @@ acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFu
   |]
  where
    acceptBranching  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = (recoupLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (publishSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
-
-
 
 -- | Complete game
 completeGame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|

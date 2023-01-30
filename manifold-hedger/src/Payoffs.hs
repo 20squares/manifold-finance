@@ -34,7 +34,6 @@ recoupLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, pric
 ------------
 -- In all subgames from here on, the seller must carry the acceptance costs 
 -- | PayoffHL for seller when fullfilling the contract
--- TODO Check _gasAlloc_
 fulfillLHPayoffSeller :: Wealth -> (Transaction, HLContract, Gas, GasPrice,GasPrice,FulfillDecisionSeller) -> PayoffHL
 fulfillLHPayoffSeller wealthSeller (Transaction{..}, HLContract{..}, gasPub, priceNew, priceOld, decision) =
   case decision of
@@ -45,7 +44,6 @@ fulfillLHPayoffSeller wealthSeller (Transaction{..}, HLContract{..}, gasPub, pri
     costsAcceptance = ((-gasAccept) * priceOld) - collateral
 
 -- | PayoffHL for seller when not fullfilling the contract
--- TODO Check _gasAlloc_
 noFulfillLHPayoffSeller :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, FulfillDecisionSeller) -> PayoffHL
 noFulfillLHPayoffSeller wealthSeller ( Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
   case decision of

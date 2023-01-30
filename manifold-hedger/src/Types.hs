@@ -58,7 +58,7 @@ data HLContract = HLContract
   } deriving (Eq,Show,Ord)
 
 -- | Transaction that the buyer wants to get implemented
--- TODO: we assume that gasAllocTX are known at the beginning here
+-- NOTE: we assume that gasAllocTX are known at the beginning here
 data Transaction = Transaction
   { gasAllocTX    :: Gas
   , utilityFromTX :: Utility

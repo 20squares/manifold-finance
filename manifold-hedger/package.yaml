@@ -58,7 +58,7 @@ executables:
 tests:
   manifold-hedger-test:
     main:                Spec.hs
-    source-dirs:         src/test
+    source-dirs:         test
     ghc-options:
     - -threaded
     - -rtsopts
