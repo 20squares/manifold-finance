@@ -4,8 +4,6 @@ module Payoffs
   where
 
 import Types
-import Distribution.Parsec (ParsecParser)
-import Types (Transaction(utilityFromTX, gasAllocTX))
 
 -- | PayoffHL for buyer when no initialized contract
 -- Paper:
