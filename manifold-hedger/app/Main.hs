@@ -57,3 +57,17 @@ main = do
         let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (75*10**3) (20*10**3) utilityParameter utilityParameter))) lsUtilityParameters
         print ls'
 
+-- 3. main for the interactive version
+interactiveMain :: Double -> PayoffHL -> PayoffHL -> IO ()
+interactiveMain payment utilityParameterBuyer utilityParameterSeller = do
+  distribution <- importProbDistFile $ toFilePath $ dirProbability </> distributionFile
+  case distribution of
+    Left x -> print x
+    Right probDist ->  do
+        putStrLn "Evaluation of negative payments with zero costs"
+        let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
+            ls = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0  2.0 2.0))
+        print ls
+        putStrLn "Evaluation of risk parameters with LH paper costs"                  
+        let ls' = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment (75*10**3) (20*10**3)  2.0 2.0))
+        print ls'
