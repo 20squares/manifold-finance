@@ -32,11 +32,13 @@ testStrategy = Strategy
    initiateStrategyBuyerTarget
    noLHPublishStrategyTarget
    acceptStrategyTarget
+   recoupPublishTarget
    recoupStrategyTarget
    lhPublishStrategyPart1Target
    lhPublishStrategyPart2Target
    fulfillStrategyTarget
    noFulfillStrategyTarget
+   nofulfillPublishTarget
 
 testStrategyTupleTarget = completeStrategy testStrategy
 

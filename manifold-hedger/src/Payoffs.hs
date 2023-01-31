@@ -4,6 +4,12 @@ module Payoffs
   where
 
 import Types
+import Types (PublishDecision(Publish))
+
+{-
+Contains all the payoff functions taken from hedger ledger paper
+-}
+
 
 -- | PayoffHL for buyer when no initialized contract
 -- Paper:
@@ -12,10 +18,7 @@ import Types
       -- Publish gasPub -> gasAllocTX : wealthBuyer + utilityFromTX - gasAllocTX * priceNew
 noLHPayoffBuyer :: Wealth -> (Transaction, GasPrice, (PublishDecision Gas)) -> PayoffHL
 noLHPayoffBuyer wealthBuyer (_, _, NoOp) = wealthBuyer
-noLHPayoffBuyer wealthBuyer (Transaction{..}, priceNew, (Publish _)) = wealthBuyer + utilityFromTX - (gasAllocTX * priceNew)
--- This should really be:
--- noLHPayoffBuyer wealthBuyer (Transaction{..}, priceNew, (Publish _)) = wealthBuyer + utilityFromTX - (gasPub * priceNew)
--- As Buyer is consuming only the effective gas of the transaction, gasPub, and not the entire amount of gas reserved!
+noLHPayoffBuyer wealthBuyer (Transaction{..}, priceNew, (Publish gasPub)) = wealthBuyer + utilityFromTX - (gasPub * priceNew)
 
 -- | PayoffHL for seller when no initialized contract
 -- Paper:
@@ -23,7 +26,6 @@ noLHPayoffBuyer wealthBuyer (Transaction{..}, priceNew, (Publish _)) = wealthBuy
          --  Sells his blockspace : wealthSeller + gasAllocTX * priceNew
 noLHPayoffSeller :: Wealth -> Transaction -> GasPrice -> PayoffHL
 noLHPayoffSeller wealthSeller Transaction{..} priceNew = wealthSeller +  gasAllocTX * priceNew
-
 
 ------------------------------
 -- Payoffs after initialization
@@ -51,17 +53,15 @@ recoupLHPayoffSeller = noLHPayoffSeller
         --                                 ^^ initiation costs of the contract
         --                              + maximum [0, utilityFromTX - (gasAllocTx * priceNew)]
         --                                 ^^ buyer can still do the transaction if it is worth it
-recoupLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, RecoupDecisionBuyer) ->  PayoffHL
-recoupLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
+recoupLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, RecoupDecisionBuyer, PublishDecision Gas) ->  PayoffHL
+recoupLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, priceOld, decision, publish) =
   case decision of
-    Refund  -> wealthBuyer + maximum [0,netUtility] + payment + epsilon - priceNew * gasDone + costsInitialization
-    Forfeit -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+    Refund  -> wealthBuyer + (netUtility publish) + payment + epsilon - priceNew * gasDone + costsInitialization
+    Forfeit -> wealthBuyer + (netUtility publish) + costsInitialization
   where
-    netUtility = utilityFromTX - (gasAllocTX * priceNew)
--- This should really be:
---    netUtility = utilityFromTX - (gasPub * priceNew)
--- As Buyer is consuming only the effective gas of the transaction, gasPub, and not the entire amount of gas reserved!
-    costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
+    netUtility NoOp = 0
+    netUtility (Publish gasPub) = utilityFromTX -  gasPub * priceNew
+    costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon
 
 
 ------------
@@ -100,9 +100,6 @@ fulfillLHPayoffSeller wealthSeller (Transaction{..}, HLContract{..}, gasPub, pri
   case decision of
     Exhaust -> wealthSeller + payment + collateral - (gasDone * priceNew) + costsAcceptance
     Ignore  -> wealthSeller + gasAllocTX * priceNew + costsAcceptance
--- This should really be:
-  --  Confirm -> wealthSeller + payment + collateral + epsilon + ((-gasDone + maximum [0, (gasAllocTX - gasPub)]) * priceNew) +  costsAcceptance
--- As gasPub could be higher than gasAllocTX. This should basically be illegal, but if we don't implement constraint checking...
     Confirm -> wealthSeller + payment + collateral + epsilon + ((-gasDone + (gasAllocTX - gasPub)) * priceNew) +  costsAcceptance
   where
     costsAcceptance = ((-gasAccept) * priceOld) - collateral
@@ -148,17 +145,14 @@ noFulfillLHPayoffSeller wealthSeller ( Transaction{..}, HLContract{..}, priceNew
         -- Confirm: wealthBuyer - (payment + epsilon + gasInit * priceOld)
         --                           ^^ initiation costs of the contract
         --                      + utilityFromTX 
-fulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice,GasPrice,FulfillDecisionSeller) -> PayoffHL
-fulfillLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
-  case decision of
-    Exhaust -> wealthBuyer + maximum [0,netUtility] + costsInitialization
-    Ignore  -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+fulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice,GasPrice,FulfillDecisionSeller,  Gas) -> PayoffHL
+fulfillLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, priceOld, decisionSeller, gasPub) =
+  case decisionSeller of
+    Exhaust -> wealthBuyer + maximum[0,netUtility] + costsInitialization
+    Ignore  -> wealthBuyer + maximum[0,netUtility] + costsInitialization
     Confirm -> wealthBuyer + utilityFromTX + costsInitialization
   where
-    netUtility = utilityFromTX - (gasAllocTX * priceNew)
--- This should really be:
---    netUtility = utilityFromTX - (gasPub * priceNew)
--- As Buyer is consuming only the effective gas of the transaction, gasPub, and not the entire amount of gas reserved!
+    netUtility = utilityFromTX -  gasPub * priceNew
     costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
 
 -- | PayoffHL for buyer conditional on the fulfillment decision
@@ -173,15 +167,13 @@ fulfillLHPayoffBuyer wealthBuyer (Transaction{..}, HLContract{..}, priceNew, pri
         --                           ^^ initiation costs of the contract
         --                       + maximum [0, utilityFromTX - (gasAllocTx * priceNew)]
         --                           ^^ buyer can still do the transaction if it is worth it
-noFulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, FulfillDecisionSeller) -> PayoffHL
-noFulfillLHPayoffBuyer wealthBuyer ( Transaction{..}, HLContract{..}, priceNew, priceOld, decision) =
-  case decision of
-    Exhaust -> wealthBuyer + maximum [0,netUtility] + costsInitialization
-    Ignore  -> wealthBuyer + maximum [0,netUtility] + costsInitialization
+noFulfillLHPayoffBuyer :: Wealth -> (Transaction, HLContract, GasPrice, GasPrice, FulfillDecisionSeller, PublishDecision Gas) -> PayoffHL
+noFulfillLHPayoffBuyer wealthBuyer ( Transaction{..}, HLContract{..}, priceNew, priceOld, decisionSeller, decisionBuyer) =
+  case decisionSeller of
+    Exhaust -> wealthBuyer + (netUtility decisionBuyer) + costsInitialization
+    Ignore  -> wealthBuyer + (netUtility decisionBuyer) + costsInitialization
   where
-    netUtility = utilityFromTX - (gasAllocTX * priceNew)
--- This should really be:
---    netUtility = utilityFromTX - (gasPub * priceNew)
--- As Buyer is consuming only the effective gas of the transaction, gasPub, and not the entire amount of gas reserved!
+    netUtility NoOp = 0
+    netUtility (Publish gasPublished) = utilityFromTX -  gasPublished * priceNew
     costsInitialization = - (gasInitiation * priceOld ) - payment - epsilon 
 

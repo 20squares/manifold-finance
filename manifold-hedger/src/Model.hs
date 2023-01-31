@@ -37,7 +37,7 @@ publishSubgame  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFu
 
    inputs    : publishDecisionGame ;
    feedback  : utilityBuyer,utilitySeller;
-   operation : publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller ;
+   operation : publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGasPubLS ;
    outputs   : fulfillDecision ;
    returns   :  ;
 
@@ -47,7 +47,7 @@ publishSubgame  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFu
    returns   : ;
   |]
  where
-   publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller  = (fulfillLHSellerPublished wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller) +++ (fulfillLHSellerNoOp wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller)
+   publishBranching wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller  possibleGasPubLS= (fulfillLHSellerPublished wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller) +++ (fulfillLHSellerNoOp wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGasPubLS)
 
 -- | Initiate ~> Accepted subgame
 acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
@@ -74,7 +74,7 @@ acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFu
    returns   : ;
   |]
  where
-   acceptBranching  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = (recoupLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (publishSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
+   acceptBranching  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = (recoupLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller possibleGasPubLS) +++ (publishSubgame  wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
 
 -- | Complete game
 completeGame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller = [opengame|
@@ -91,7 +91,7 @@ completeGame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFun
 
    inputs    : contractDecisionGame ;
    feedback  : utilityBuyer;
-   operation : completeBranching   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller;
+   operation : completeBranching   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller  possibleGasPubLS;
    outputs   : discard;
    returns   : ;
 
@@ -101,6 +101,7 @@ completeGame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFun
    returns   :  ;
   |]
   where
-    completeBranching   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller = (noLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller) +++ (acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
+    completeBranching   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller possibleGasPubLS = (noLHBuyerRandom   wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller possibleGasPubLS) +++ (acceptSubgame   wealthBuyer wealthSeller distribution possibleGasPubLS utilityFunctionBuyer utilityFunctionSeller)
+
 
 

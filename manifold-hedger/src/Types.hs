@@ -113,6 +113,10 @@ data Strategy a = Strategy
                                 Stochastic
                                 (Transaction, HLContract, GasPrice)
                                 AcceptDecisionSeller
+  , recoupPublish          :: Kleisli
+                                Stochastic
+                                (Transaction, GasPrice)
+                                (PublishDecision Double)
   , recoupStrategy         :: Kleisli
                                 Stochastic
                                 (Transaction, HLContract, GasPrice, GasPrice)
@@ -133,30 +137,39 @@ data Strategy a = Strategy
                                 Stochastic
                                 (Transaction, HLContract, GasPrice, GasPrice)
                                 FulfillDecisionSeller
-  } 
+  , nofulfillPublish       :: Kleisli
+                                Stochastic
+                                (Transaction, GasPrice)
+                                (PublishDecision Double)
+  }
 
 -- Complete strategy description as tuple for each relevant subgame
 completeStrategy Strategy{..} =
   ( initiateStrategyBuyer
     ::- noLHPublishStrategy
     ::- acceptStrategy
+    ::- recoupPublish
     ::- recoupStrategy
     ::- lhPublishStrategyPart1
     ::- lhPublishStrategyPart2
     ::- fulfillStrategy
     ::- noFulfillStrategy
+    ::- nofulfillPublish
     ::- Nil
   , acceptStrategy
+    ::- recoupPublish
     ::- recoupStrategy
     ::- lhPublishStrategyPart1
     ::- lhPublishStrategyPart2
     ::- fulfillStrategy
     ::- noFulfillStrategy
+    ::- nofulfillPublish
     ::- Nil
   , lhPublishStrategyPart1
     ::- lhPublishStrategyPart2
     ::- fulfillStrategy
     ::- noFulfillStrategy
+    ::- nofulfillPublish
     ::- Nil
   )
 
