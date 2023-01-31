@@ -44,9 +44,9 @@ testStrategyTupleTarget = completeStrategy testStrategy
 -- 2. Contract Parameters used
 
 testContract payment gInit gAccept gDone = HLContract
-   (10**9)
-   payment
-   1
+   (10**9) -- Collateral
+   payment -- NOTE: paper (gasAllocTX testTransaction * 100), so piContract = 100)
+   1       -- NOTE: paper 1 (epsilon)
    gInit   -- NOTE: paper (0.1*10**6)
    gAccept -- NOTE: paper (75*10**3)
    gDone   -- NOTE: paper (20*10**3)
@@ -54,8 +54,8 @@ testContract payment gInit gAccept gDone = HLContract
 
 
 testTransaction = Transaction
-  (5 * 10**6)
-  (10**9)
+  (5 * 10**6) -- gasAllocTX
+  (10**9)     -- utilityFromTX
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
@@ -83,12 +83,13 @@ exponentialUtility par x = x**(1/par)
 parameters distribution payment gInit gAccept gDone exponentialBuyer exponentialSeller  = Parameters
   "buyer"
   "seller"
-  (10**9)
-  (10**9)
+  (10**9)                                     -- buyerWealth
+  (10**9)                                     -- sellerWealth
   distribution
   testActionSpaceGasPub
   testTransaction
   (testContract payment gInit gAccept gDone)
-  100
-  (exponentialUtility exponentialBuyer)
-  (exponentialUtility exponentialSeller)
+  100                                         -- piInitial
+  (exponentialUtility exponentialBuyer)       -- utilityFunctionBuyer
+  (exponentialUtility exponentialSeller)      -- utilityFunctionSeller
+
