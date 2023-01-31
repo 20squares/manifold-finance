@@ -19,6 +19,7 @@ import           Data.Csv
 import qualified Data.Vector          as V
 import Numeric.Probability.Distribution (shape, norm, fromFreqs)
 import Numeric.Probability.Shape (normalCurve)
+import Types (Transaction(gasAllocTX))
 
 {-
 Defines the concrete parameterizations used for the analysis
@@ -45,16 +46,13 @@ testStrategyTupleTarget = completeStrategy testStrategy
 ------------------------------
 -- 2. Contract Parameters used
 
-testContract = HLContract
+testContract  = HLContract
    (10**9)
--- This should really be:
-  -- ((5*10**6)*piContract)
--- As in the paper we have: payment = piContract * gasAllocTX
-   ((5*10**6)*100)
-   1
-   (0.1*10**6)
-   (75*10**3)
-   (20*10**3)
+   (gasAllocTX testTransaction * 100)
+   0 -- 1
+   0 --(0.1*10**6)
+   0 --(75*10**3)
+   0 --(20*10**3)
 
 testTransaction = Transaction
   (5 * 10**6)
@@ -91,6 +89,6 @@ parameters distribution = Parameters
   testTransaction
   testContract
   100
-  logUtility
-  logUtility
+  id -- logUtility
+  id -- logUtility
 

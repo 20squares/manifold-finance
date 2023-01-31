@@ -44,6 +44,7 @@ type Payment    = Double
 type Gas        = Double
 type GasPrice   = Double
 type Utility    = Double
+type PIContract = Double
 
 newtype GasPriceNew = GasPriceNew Double
 
