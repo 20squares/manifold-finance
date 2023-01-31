@@ -19,7 +19,7 @@ Defines the strategies
 
 ----------------
 -- 1. Strategies
--- | initiate contract strategy 
+-- | Buyer: initiate contract strategy 
 initiateStrategyBuyerTarget
   :: Kleisli
            Stochastic
@@ -28,7 +28,7 @@ initiateStrategyBuyerTarget
 initiateStrategyBuyerTarget =
   Kleisli (\(_,contract,_) -> playDeterministically $ Initiate contract)
 
--- | publish strategy if no LH
+-- | Buyer: publish strategy if no LH
 noLHPublishStrategyTarget
   :: Kleisli
        Stochastic
@@ -36,7 +36,7 @@ noLHPublishStrategyTarget
        (PublishDecision Double)
 noLHPublishStrategyTarget = pureAction $ Publish 0.0
 
--- | accept decision seller
+-- | Seller: accept decision
 acceptStrategyTarget
   :: Kleisli
        Stochastic
@@ -44,7 +44,7 @@ acceptStrategyTarget
        AcceptDecisionSeller
 acceptStrategyTarget = pureAction Accept
 
--- | recoup strategy buyer
+-- | Buyer: publish strategy if recoup
 recoupStrategyTarget
   :: Kleisli
        Stochastic
@@ -52,7 +52,7 @@ recoupStrategyTarget
        RecoupDecisionBuyer
 recoupStrategyTarget = pureAction Refund
 
--- | publish strategy part 1 if LH
+-- | Buyer: publish strategy part 1 if LH
 lhPublishStrategyPart1Target
   :: Kleisli
        Stochastic
@@ -60,7 +60,7 @@ lhPublishStrategyPart1Target
        (PublishDecision Double)
 lhPublishStrategyPart1Target =  pureAction $ Publish 0.0
 
--- | publish strategy part 2 if LH
+-- | Buyer: publish strategy part 2 if LH
 lhPublishStrategyPart2Target
   ::  Kleisli
           Stochastic
@@ -73,7 +73,7 @@ lhPublishStrategyPart2Target =
           NoOp -> playDeterministically NoOp
           Publish _ -> playDeterministically $ Publish $ gasAllocTX tx)
 
--- | fulfill strategy
+-- | Seller: fulfill strategy
 fulfillStrategyTarget
   :: Kleisli
        Stochastic
@@ -81,7 +81,7 @@ fulfillStrategyTarget
        FulfillDecisionSeller
 fulfillStrategyTarget = pureAction Confirm
 
--- | noFulfill strategy
+-- | Seller: noFulfill strategy
 noFulfillStrategyTarget
   :: Kleisli
        Stochastic
