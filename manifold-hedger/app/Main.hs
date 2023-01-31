@@ -24,7 +24,7 @@ dirProbability = [reldir|probability|]
 distributionFile = [relfile|distribution.csv|]
 
 -- | List of payments to check
-lsPaymentsToCheck = [0, -10**1, -10**2, -10**3, -10**4,-10**5, -10**6, -10**7, -10**8]
+lsPiContractToCheck = [90,91..110]
 
 -- | List of exponential utility parameters to check
 lsUtilityParameters = [1,1.1..2.0]
@@ -51,7 +51,7 @@ main = do
     Right probDist ->  do
         putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 0  2.0 2.0))) lsPaymentsToCheck
+            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 0  2.0 2.0))) lsPiContractToCheck
         print ls
         putStrLn "Evaluation of risk parameters for exponential utility"
         let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (0.1*10**6) (75*10**3) (20*10**3) utilityParameter utilityParameter))) lsUtilityParameters

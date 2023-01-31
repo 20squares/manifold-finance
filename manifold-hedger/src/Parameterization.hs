@@ -19,6 +19,7 @@ import           Data.Csv
 import qualified Data.Vector          as V
 import Numeric.Probability.Distribution (shape, norm, fromFreqs)
 import Numeric.Probability.Shape (normalCurve)
+import Types (Transaction(gasAllocTX))
 
 {-
 Defines the concrete parameterizations used for the analysis
@@ -32,21 +33,23 @@ testStrategy = Strategy
    initiateStrategyBuyerTarget
    noLHPublishStrategyTarget
    acceptStrategyTarget
+   recoupPublishTarget
    recoupStrategyTarget
    lhPublishStrategyPart1Target
    lhPublishStrategyPart2Target
    fulfillStrategyTarget
    noFulfillStrategyTarget
+   nofulfillPublishTarget
 
 testStrategyTupleTarget = completeStrategy testStrategy
 
 ------------------------------
 -- 2. Contract Parameters used
 
-testContract payment gInit gAccept gDone = HLContract
-   (10**9) -- Collateral
-   payment -- NOTE: paper (gasAllocTX testTransaction * 100), so piContract = 100)
-   1       -- NOTE: paper 1 (epsilon)
+testContract piContract gInit gAccept gDone = HLContract
+   (10**9)
+   (gasAllocTX testTransaction * piContract)
+   1
    gInit   -- NOTE: paper (0.1*10**6)
    gAccept -- NOTE: paper (75*10**3)
    gDone   -- NOTE: paper (20*10**3)
@@ -80,7 +83,7 @@ exponentialUtility par x = x**(1/par)
 
 -------------------------
 -- 5. Complete parameters
-parameters distribution payment gInit gAccept gDone exponentialBuyer exponentialSeller  = Parameters
+parameters distribution piContract gInit gAccept gDone exponentialBuyer exponentialSeller  = Parameters
   "buyer"
   "seller"
   (10**9)                                     -- buyerWealth
@@ -88,8 +91,7 @@ parameters distribution payment gInit gAccept gDone exponentialBuyer exponential
   distribution
   testActionSpaceGasPub
   testTransaction
-  (testContract payment gInit gAccept gDone)
-  100                                         -- piInitial
-  (exponentialUtility exponentialBuyer)       -- utilityFunctionBuyer
-  (exponentialUtility exponentialSeller)      -- utilityFunctionSeller
-
+  (testContract piContract gInit gAccept gDone)
+  100
+  (exponentialUtility exponentialBuyer)
+  (exponentialUtility exponentialSeller)

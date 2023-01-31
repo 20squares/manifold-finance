@@ -34,7 +34,7 @@ noLHPublishStrategyTarget
        Stochastic
        (Transaction, GasPrice)
        (PublishDecision Double)
-noLHPublishStrategyTarget = pureAction $ Publish 0.0
+noLHPublishStrategyTarget =  Kleisli (\(tx,_ ) -> playDeterministically $ Publish (gasAllocTX tx))
 
 -- | Seller: accept decision
 acceptStrategyTarget
@@ -44,7 +44,16 @@ acceptStrategyTarget
        AcceptDecisionSeller
 acceptStrategyTarget = pureAction Accept
 
--- | Buyer: publish strategy if recoup
+
+-- | publish strategy if recoup
+recoupPublishTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, GasPrice)
+       (PublishDecision Double)
+recoupPublishTarget =  Kleisli (\(tx,_ ) -> playDeterministically $ Publish (gasAllocTX tx))
+
+-- | recoup strategy buyer
 recoupStrategyTarget
   :: Kleisli
        Stochastic
@@ -88,4 +97,12 @@ noFulfillStrategyTarget
        (Transaction, HLContract, GasPrice, GasPrice)
        FulfillDecisionSeller
 noFulfillStrategyTarget = pureAction Exhaust
+
+-- | publish strategy if no fulfill
+nofulfillPublishTarget
+  :: Kleisli
+       Stochastic
+       (Transaction, GasPrice)
+       (PublishDecision Double)
+nofulfillPublishTarget =  Kleisli (\(tx,_ ) -> playDeterministically $ Publish (gasAllocTX tx))
 

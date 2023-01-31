@@ -2,10 +2,16 @@ module ActionSpaces
   where
 
 import Types
+import Types (Transaction(gasAllocTX))
 
 -- | Initiate decision buyer
 -- Given the observation, the contract and the current gas price, the player can choose to initiate or wait
 actionSpaceInitLHBuyer (_, contract,_) = [Wait, Initiate contract]
+
+-- | No LH case
+actionSpaceNoLHBuyer
+  :: [Gas] -> (Transaction, GasPrice) -> [(PublishDecision Gas)]
+actionSpaceNoLHBuyer possibleGas (tx,_ ) = fmap Publish possibleGas
 
 -- | Publish decision buyer
 -- Given the observed price, choose the gas price 

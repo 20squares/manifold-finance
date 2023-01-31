@@ -69,7 +69,7 @@ initLHBuyer  = [opengame|
 
 
 -- | Buyer decision whether no LH
-noLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
+noLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGasLS = [opengame|
 
    inputs    : tx, piNew ;
    feedback  : utilityBuyer;
@@ -77,8 +77,7 @@ noLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller =
    :----------------------------:
    inputs    : tx, piNew ;
    feedback  : ;
-   operation : dependentDecision "buyer noLH" (const [NoOp, Publish 0]);
-   // NOTE ignore the gasPub variable  as not needed
+   operation : dependentDecision "buyer noLH" $ actionSpaceNoLHBuyer possibleGasLS ;
    outputs   : publishDecision ;
    returns   : utilityBuyer ;
 
@@ -106,7 +105,7 @@ noLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller =
 
 
 -- | Buyer decision whether no LH with random sample
-noLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller= [opengame|
+noLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller possibleGasLS = [opengame|
 
    inputs    : tx ;
    feedback  : utilityBuyer;
@@ -120,7 +119,7 @@ noLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer util
 
    inputs    : tx, piNew ;
    feedback  : utilityBuyer;
-   operation : noLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller ;
+   operation : noLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGasLS;
    outputs   : ;
    returns   : ;
 
@@ -131,20 +130,26 @@ noLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer util
   |]
 
 -- | Buyer recoup LH
-recoupLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
+recoupLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGasLS = [opengame|
 
    inputs    : tx, contract, piNew, piOld;
    feedback  : utilityBuyer, utilitySeller;
 
    :----------------------------:
-   inputs    : tx, contract, piNew, piOld ;
+
+   inputs    : tx, piNew ;
+   feedback  : ;
+   operation : dependentDecision "buyer noLH - recoup" $ actionSpaceNoLHBuyer possibleGasLS ;
+   outputs   : publishDecision ;
+   returns   : 0 ;
+
+   inputs    : tx, contract, piNew, piOld;
    feedback  : ;
    operation : dependentDecision "recoup LH" (const [Refund,Forfeit]);
    outputs   : recoupDecision ;
-   returns   : utilityBuyer ;
-   // NOTE we make a shortcut for the buyer's decision to run the tx
+   returns   : utilityBuyer  ;
 
-   inputs    : tx, contract, piNew, piOld, recoupDecision ;
+   inputs    : tx, contract, piNew, piOld, recoupDecision, publishDecision ;
    feedback  : ;
    operation : forwardFunction $ utilityFBuyer ;
    outputs   : utilityBuyer ;
@@ -169,7 +174,7 @@ recoupLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSell
 
 
 -- | Buyer recoup LH with random sample
-recoupLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller= [opengame|
+recoupLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer utilityFunctionSeller possibleGasLS = [opengame|
 
    inputs    : tx, contract, piOld ;
    feedback  : utilityBuyer, utilitySeller ;
@@ -184,7 +189,7 @@ recoupLHBuyerRandom  wealthBuyer wealthSeller distribution utilityFunctionBuyer 
 
    inputs    : tx, contract, piNew, piOld ;
    feedback  : utilityBuyer, utilitySeller ;
-   operation : recoupLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller;
+   operation : recoupLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGasLS;
    outputs   :  ;
    returns   :  ;
 
@@ -258,7 +263,7 @@ publishLHBuyerRandom  distribution possibleGasPubLS = [opengame|
    outputs   : publishDecisionGame ;
    returns   : utilityBuyer, seller;
   |]
-  
+
 -- 1.2. Seller
 -- | Accept LH seller
 acceptLHSeller  = [opengame|
@@ -307,13 +312,13 @@ fulfillLHSellerPublished  wealthBuyer wealthSeller utilityFunctionBuyer utilityF
    returns   : ;
    // Compute payoffs for seller
 
-   inputs    : tx, contract, piNew, piOld, fulfillDecision ;
+   inputs    : tx, contract, piNew, piOld, fulfillDecision, gasPub;
    feedback  : ;
    operation : forwardFunction $ utilityFBuyer ;
    outputs   : utilityBuyer ;
    returns   : ;
    // Compute payoffs for buyer
-   
+
    :----------------------------:
 
    outputs   : fulfillDecision ;
@@ -323,9 +328,8 @@ fulfillLHSellerPublished  wealthBuyer wealthSeller utilityFunctionBuyer utilityF
    utilityFBuyer x = utilityFunctionBuyer $ fulfillLHPayoffBuyer wealthBuyer x
    utilityFSeller x = utilityFunctionSeller $ fulfillLHPayoffSeller wealthSeller x
 
-
 -- | fulfill LH seller if no-op
-fulfillLHSellerNoOp  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller = [opengame|
+fulfillLHSellerNoOp  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSeller possibleGaseLS = [opengame|
 
    inputs    : tx, contract, piNew, piOld ;
    feedback  : utilityBuyer,utilitySeller;
@@ -345,7 +349,13 @@ fulfillLHSellerNoOp  wealthBuyer wealthSeller utilityFunctionBuyer utilityFuncti
    returns   : ;
    // Compute payoffs for seller
 
-   inputs    : tx, contract, piNew, piOld, noFulfillDecision ;
+   inputs    : tx, piNew ;
+   feedback  : ;
+   operation : dependentDecision "buyer no fulfill" $ actionSpaceNoLHBuyer possibleGaseLS ;
+   outputs   : publishDecision ;
+   returns   : 0 ;
+
+   inputs    : tx, contract, piNew, piOld, noFulfillDecision, publishDecision ;
    feedback  : ;
    operation : forwardFunction $ utilityBuyer ;
    outputs   : utilityBuyer ;
