@@ -45,7 +45,7 @@ acceptStrategyTarget
 acceptStrategyTarget = pureAction Accept
 
 
--- | publish strategy if recoup
+-- | Buyer: publish strategy if recoup
 recoupPublishTarget
   :: Kleisli
        Stochastic
@@ -53,7 +53,7 @@ recoupPublishTarget
        (PublishDecision Double)
 recoupPublishTarget =  Kleisli (\(tx,_ ) -> playDeterministically $ Publish (gasAllocTX tx))
 
--- | recoup strategy buyer
+-- | Buyer: recoup strategy buyer
 recoupStrategyTarget
   :: Kleisli
        Stochastic
@@ -98,7 +98,7 @@ noFulfillStrategyTarget
        FulfillDecisionSeller
 noFulfillStrategyTarget = pureAction Exhaust
 
--- | publish strategy if no fulfill
+-- | Buyer: publish strategy if no fulfill
 nofulfillPublishTarget
   :: Kleisli
        Stochastic
