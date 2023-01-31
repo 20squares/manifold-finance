@@ -154,7 +154,7 @@ recoupLHBuyer  wealthBuyer wealthSeller utilityFunctionBuyer utilityFunctionSell
    operation : forwardFunction $ utilityFBuyer ;
    outputs   : utilityBuyer ;
    returns   : ;
-   // Compute payoffs for seller
+   // Compute payoffs for buyer
 
    inputs    : tx, piNew ;
    feedback  : ;
