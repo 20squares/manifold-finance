@@ -32,7 +32,8 @@
     - [Reading the analytics](#reading-the-analytics)
     - [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results)
     - [Other analyses](#other-analyses)
-
+      - [Sanity checks](#sanity-checks)
+      - [Interactive perks](#interactive-perks)
 # Summary
 
 This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular **Seller**). Our model allows for custom definitions of risk-sensitivity for all players.
@@ -638,7 +639,6 @@ These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As
 
 Moreover, as specified in the section [Assumptions made explicit](#assumptions-made-explicit), we had to postulate an explicit utility for the transaction that **Buyer** wants to issue. This is represented by the parameter `utilityFromTX`, which has been set to $10^9$.
 
-
 As for future price distribution, we defined it in csv format in the file `/probability/distribution.csv` ((we also provide a constant distribution, `/probability/distributionOneElement.csv` for debugging reasons). `distribution.csv` is a normal distribution centered around the initial gas price. Again, we used the standard deviations suggested in the paper. 
 
 Moreover, we defined `testActionSpaceGasPub`, representing the range in which $g_{pub}$ can swing. $g_{pub}$ is the gas consumed if **Buyer** decides to issue the transaction at market price (for more information see [Ambiguous **Buyer** behavior](#ambiguous-buyer-behavior)). In practice, we followed the paper and equated $g_{pub}$ and $g_{alloc}$, meaning that **Buyer** is using Ledger-Hedger to reserve the precise amount of gas needed to execute the transaction.
@@ -661,12 +661,6 @@ In this scenario, both Players will be much more willing to use Ledger-Hedger, a
 ## Other analyses
 
 We ran also some other analyses these can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). 
-
-In this branch, there are more things one can do, the most important being that we expose a new function in `Main.hs` that allows for better interactive queries. Giving:
-
-```haskell
-interactiveMain piContract 
-```
 
 First of all, and unsurprisingly, we found out that running the model with the following parameters results in a much bigger utility:
 
@@ -724,7 +718,19 @@ For $\texttt{piContract} = 102$:
 
 As one can see, as `piContract` increases the shaded regions migrate to the lower-right end. Again, this makes sense: As the price goes higher, **Buyer** is paying more and more for `gasAllocTX` with respect to current price. This entails that **Buyer** should be more risk-averse to deemm this advantageous, and hence the region moves further to the right on the **Buyer** axis. Specularly, **Seller** is receiving an increasingly better offer compared to the current price, lowering the necessity for risk-aversity. As such, the region grows closer to the **Seller** axis.
 
-Finally, we performed some sanity checks: Using the constant distribution, we verified the following things:
+### Sanity checks
+
+In addition to this, we performed some sanity checks: Using the constant distribution (see [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results) for more information), we verified the following things:
 
 - Setting `epsilon` to 0 results, in the 'zero fees' case, in equilibrium for any choice of risk-aversity for both players. This makes sense: Using the protocol results in zero extra costs. Moreover, both players know with certainty that the future gas price won't change. Hence, risk-aversity does not matter.
 - With *any* other choice of `epsilon` and any other fees, the equilibrium breaks for any choice of risk-aversity, for both players. Again, this makes sense: Both players know with certainty that the future gas price won't change, so payng *any* extra fee to hedge is disadvantageous.
+
+### Interactive perks
+
+Finally, in the `eq-breaking` branch there are more things one can do, the most important being that we expose a new function in `Main.hs` that allows for better interactive queries. In interactive mode, giving:
+
+```haskell
+interactiveMain piContract utilityParameterBuyer utilityParameterSeller
+```
+
+allows to run the Ledger-Hedger strategy on both the 'zero fees' and 'paper fees' scenarios, with customized `piContract` and risk-aversity parameters for both players. In ths way, the user can verify equilibria for particular choices of values without the need to recompile.
