@@ -22,6 +22,7 @@ import qualified Path.IO as IO
 -- | source files
 dirProbability = [reldir|probability|]
 distributionFile = [relfile|distribution.csv|]
+-- distributionFile = [relfile|distributionOneElement.csv|]
 
 -- | List of payments to check
 lsPiContractToCheck = [90,91..110]
@@ -49,25 +50,25 @@ main = do
   case distribution of
     Left x -> print x
     Right probDist ->  do
-        putStrLn "Evaluation of negative payments with zero costs"
+        putStrLn "Evaluation of different payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = fmap (\payment -> (payment, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 0  2.0 2.0))) lsPiContractToCheck
+            ls = fmap (\piContract -> (piContract, breakEquilibriumCompleteGame strategyComplete (parameters probDist piContract 0 0 0  2.0 2.0))) lsPiContractToCheck
         print ls
-        putStrLn "Evaluation of risk parameters for exponential utility"
+        putStrLn "Evaluation of risk parameters for exponential utility, costs as in the paper"
         let ls' = fmap (\utilityParameter -> (utilityParameter, breakEquilibriumCompleteGame strategyComplete (parameters probDist 100 (0.1*10**6) (75*10**3) (20*10**3) utilityParameter utilityParameter))) lsUtilityParameters
         print ls'
 
 -- 3. main for the interactive version
 interactiveMain :: Double -> PayoffHL -> PayoffHL -> IO ()
-interactiveMain payment utilityParameterBuyer utilityParameterSeller = do
+interactiveMain piContract utilityParameterBuyer utilityParameterSeller = do
   distribution <- importProbDistFile $ toFilePath $ dirProbability </> distributionFile
   case distribution of
     Left x -> print x
     Right probDist ->  do
         putStrLn "Evaluation of negative payments with zero costs"
         let (strategyComplete,strategyAccept,strategyPublish) = testStrategyTupleTarget
-            ls = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment 0 0 0 utilityParameterBuyer utilityParameterSeller))
+            ls = (piContract, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist piContract 0 0 0 utilityParameterBuyer utilityParameterSeller))
         print ls
         putStrLn "Evaluation of risk parameters with LH paper costs"                  
-        let ls' = (payment, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist payment (0.1*10**6) (75*10**3) (20*10**3) utilityParameterBuyer utilityParameterSeller))
+        let ls' = (piContract, utilityParameterBuyer, utilityParameterSeller, breakEquilibriumCompleteGame strategyComplete (parameters probDist piContract (0.1*10**6) (75*10**3) (20*10**3) utilityParameterBuyer utilityParameterSeller))
         print ls'
