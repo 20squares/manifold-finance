@@ -45,6 +45,9 @@ testStrategyTupleTarget = completeStrategy testStrategy
 
 testContract = HLContract
    (10**9)
+-- This should really be:
+  -- ((5*10**6)*piContract)
+-- As in the paper we have: payment = piContract * gasAllocTX
    ((5*10**6)*100)
    1
    (0.1*10**6)

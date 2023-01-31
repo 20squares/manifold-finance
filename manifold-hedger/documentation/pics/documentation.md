@@ -42,10 +42,10 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 
 A more detailed analysis can be found in the section [Analytics](#analytics).
 
-First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail, and a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
+First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail, and a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. 
 
-- The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**. On the upside,the utility loss is in turn marginal for **Buyer**.
-- In the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
+<!-- - The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**. On the upside,the utility loss is in turn marginal for **Buyer**. -->
+In our opinion, this depends on the fact that, in the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
 
 So, just considering this, **Seller** incurs a cost that is **4** orders of magnitude higher than the price paid by **Buyer**. This choice of parameters makes the protocol extremely fragile, something that is counteracted only by the fact that we are using very concave utility functions, which represent quite high risk-aversity.
 
@@ -181,15 +181,17 @@ Let us now describe the subgame space:
     - Choose to not recoup the funds ($Forfait$), in which case the amount $SentTokens$ is lost.
 - **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ($Publish$) or not ($No-op$).
 - **FullfillTX** is the subgame where **Seller** can:
-    - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$.
+    - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$. Moreover, if the gas size of the transaction $g_{pub}$ ends up being lower than the reserved $g_{alloc}$, **Seller** can sell the difference $g_{alloc} - g_{pub}$ at market price.
     - Exhaust the contract ($Exhaust$). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
     This is fundamental, as the lower payoff makes $Confirm$ a rationally better choice than $Exhaust$, thus incentivizing **Seller** not to 'betray' **Buyer**.
     - Ignore the situation ($Ignore$) by not doing anything. This results in **Seller** losing their collateral $col$.
-- **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never published the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
+- **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never publishes the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
+
 
 ## Assumptions made explicit
 
 In formalizing Ledger-Hedger, we had to make some assumptions, that were kept implicit in the paper, more explicit.
+
 
 ### Refined payoffs
 
@@ -213,12 +215,18 @@ In the first case, payoffs can become negative at some stages of the game: For i
 
 Still, adding payoffs as things progress can cause problems when one notices that the utility functions representing risk-aversion - namely `sqrt` and `log` - are well-defined only for positive numbers. To avoid this inconsistency problems we opted for calculating payoffs only when the end of a branch is reached. We also think that this represents better rational players, which are able to reason about the game until 'the very end'.
 
+
 ### Ambiguity with the `payment` parameter
 
-In the paper, there was confusion around the `payment` parameter: sometimes, it was used to mean the price at which **Buyer** offers to buy `gasAllocTX`. Some other time, it is used to mean the product of `gasAllocTX` with the price above mentioned. This mistake put us in the position of having to make a choice, since 'just following the paper' was impossible without contradictions.
+In the paper, there was confusion around the `payment` parameter: sometimes, it seemed that it was used to mean the price at which **Buyer** offers to buy `gasAllocTX`. This parameter was somewhere else denoted as $\pi_{contract}$. Some other time, instead, it seemed that `payment` was used to mean the product of `gasAllocTX` with the price mentioned above. This confusion put us in the position of having to make a choice, since 'just following the paper' was impossible without contradictions.
 
-Hence, for us, `payment` will mean the price at which **Buyer** offers to buy a quantity `gasAllocTX` of gas from **Seller**. The total payment **Buyer** will make to seller in using Ledger-Hedger will then be
-$$\mathtt{payment} \cdot \mathtt{gasAllocTX}$$
+Hence, for us:
+- `piContract` will mean the price at which **Buyer** offers to buy a quantity `gasAllocTX` of gas from **Seller**. 
+- `payment` will denote the total payment **Buyer** will make to **Seller** if using Ledger-Hedger. Thus:
+$$\mathtt{payment} = \mathtt{piContract} \cdot \mathtt{gasAllocTX}$$
+
+This equation appears multiple times in the paper, the confusion arising in some of the analyses in the 'Analysis' section.
+
 
 ### Service costs
 
