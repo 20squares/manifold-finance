@@ -12,6 +12,7 @@
         - [Ledger-Hedger: The subgame space](#ledger-hedger-the-subgame-space)
     - [Assumptions made explicit](#assumptions-made-explicit)
         - [Refined payoffs](#refined-payoffs)
+        - [Ambiguity with the `payment` parameter](#ambiguity-with-the-payment-parameter)
         - [Service costs](#service-costs)
         - [Modelling risk explicitly](#modelling-risk-explicitly)
 - [Code deep dive](#code-deep-dive)
@@ -39,12 +40,12 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 ## Analytics results
 **The most important finding in our simulations is that Ledger-Hedger is incredibly sensible to initial parameters, and not as robust as we would have expected.**
 
-A more detailed analysis can be found in the section:
+A more detailed analysis can be found in the section [Analytics](#analytics).
 
-First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail, and a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. In our opinion, this depends on two main factors:
+First of all, we tried to replicate the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium. Curiously, in the case of logarithmic utility we weren't able to replicate the paper results for the smallest standard deviation provided. This could be a question of how the distribution is computed in detail, and a symptom of the more general fact that the game-theoretic scenarios detailed in the paper are fragile. 
 
-- The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**. On the upside,the utility loss is in turn marginal for **Buyer**.
-- In the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
+<!-- - The price of the service is taken to be very low with respect to the cost of the transaction. Looking at the examples in the paper, **Seller** is reserving **5000000** units of gas for a fixed price of 100. The payment for using the Ledger Hedger service is just **101**, which is **4** orders of magnitude less than the amounts being considered. So we see that all things staying equal the utility increment with respect to not using Ledger Hedger is marginal for **Seller**. On the upside,the utility loss is in turn marginal for **Buyer**. -->
+In our opinion, this depends on the fact that, in the paper, using the service has costs: **Seller** has to pay a fee to accept the Ledger Hedger contract and to close it. In particular, acceptance is priced in at **75000** units of gas for a price of **100**, which makes **7500000**.
 
 So, just considering this, **Seller** incurs a cost that is **4** orders of magnitude higher than the price paid by **Buyer**. This choice of parameters makes the protocol extremely fragile, something that is counteracted only by the fact that we are using very concave utility functions, which represent quite high risk-aversity.
 
@@ -52,7 +53,7 @@ Indeed, in a risk-neutral scenario there is no difference between using or not u
 
 Summarizing, our main findings are the following:
 - Running the protocol with the parameters provided in the paper makes no sense, as the advantage in using Ledger-Hedger is very low even for very risk-averse players.
-- Using Ledger-Hedger makes players incur  extra costs: **Seller** pays a fee for using the platform, whereas **Buyer** pays a (smaller) fee for using the platform *and* has also to pay **Seller** a price premium.
+- Using Ledger-Hedger makes players incur extra costs: **Seller** pays a fee for using the platform, whereas **Buyer** pays a (smaller) fee for using the platform *and* has also to pay **Seller** a price premium.
 - These expenses are only offset by the risk-aversity of the players. The more risk-averse they are, the more it makes sense for them to carry these extra costs.
 - Varying the price parameter won't help much, as price constitutes revenue for **Seller** but a cost for **Buyer**. So the more we make it convenient for the former, the less we make it convenient for the latter, and vice-versa.
 - As it is instantiated, the protocol is so brittle that even small changes in the standard deviation of future gas price distribution disturb the equilibrium.
@@ -180,15 +181,17 @@ Let us now describe the subgame space:
     - Choose to not recoup the funds ($Forfait$), in which case the amount $SentTokens$ is lost.
 - **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ($Publish$) or not ($No-op$).
 - **FullfillTX** is the subgame where **Seller** can:
-    - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$.
+    - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$. Moreover, if the gas size of the transaction $g_{pub}$ ends up being lower than the reserved $g_{alloc}$, **Seller** can sell the difference $g_{alloc} - g_{pub}$ at market price.
     - Exhaust the contract ($Exhaust$). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
     This is fundamental, as the lower payoff makes $Confirm$ a rationally better choice than $Exhaust$, thus incentivizing **Seller** not to 'betray' **Buyer**.
     - Ignore the situation ($Ignore$) by not doing anything. This results in **Seller** losing their collateral $col$.
-- **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never published the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
+- **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never publishes the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
+
 
 ## Assumptions made explicit
 
 In formalizing Ledger-Hedger, we had to make some assumptions, that were kept implicit in the paper, more explicit.
+
 
 ### Refined payoffs
 
@@ -211,6 +214,19 @@ Adopting this flow perspective, things change a great deal if one decides to add
 In the first case, payoffs can become negative at some stages of the game: For instance, in the subgame **AcceptLH**, **Seller** gets a negative payoff when the $Accept$ decision is taken. Clearly, this allows the game to progress and **Seller** will be able to recoup the collateral together with the mining fee later on, making the payoff positive overall.
 
 Still, adding payoffs as things progress can cause problems when one notices that the utility functions representing risk-aversion - namely `sqrt` and `log` - are well-defined only for positive numbers. To avoid this inconsistency problems we opted for calculating payoffs only when the end of a branch is reached. We also think that this represents better rational players, which are able to reason about the game until 'the very end'.
+
+
+### Ambiguity with the `payment` parameter
+
+In the paper, there was confusion around the `payment` parameter: sometimes, it seemed that it was used to mean the price at which **Buyer** offers to buy `gasAllocTX`. This parameter was somewhere else denoted as $\pi_{contract}$. Some other time, instead, it seemed that `payment` was used to mean the product of `gasAllocTX` with the price mentioned above. This confusion put us in the position of having to make a choice, since 'just following the paper' was impossible without contradictions.
+
+Hence, for us:
+- `piContract` will mean the price at which **Buyer** offers to buy a quantity `gasAllocTX` of gas from **Seller**. 
+- `payment` will denote the total payment **Buyer** will make to **Seller** if using Ledger-Hedger. Thus:
+$$\mathtt{payment} = \mathtt{piContract} \cdot \mathtt{gasAllocTX}$$
+
+This equation appears multiple times in the paper, the confusion arising in some of the analyses in the 'Analysis' section.
+
 
 ### Service costs
 
@@ -446,6 +462,9 @@ The model is composed of several files:
 
 Relying on the DSL Primer, parsing the code structure should be a manageable task.
 
+Moreover, the code is divided in two different branches:
+- `main` contains the standard model, and runs analytics with the parameters provided in the Ledger-Hedger paper.
+- `eq-breaking` instead parametrizes the risk-aversity in the utility functions, and runs stress tests to check under which conditions the equilibrium breaks.
 
 # Analytics
 
@@ -573,22 +592,29 @@ For more information about how to supply strategies and/or how to make changes, 
 
 ## Replicating the Ledger-Hedger paper results 
 
+These results can be found in the `main` branch (see subsection [File structure](#file-structure) for more information). The results can be seen by just running `stack run` in normal execution mode, or by giving `main` in the REPL (see [Installation](#installation) for details). In both case, we will be running the `main` function defined in `Main.hs`, which runs a predetermined battery of tests.
+
 To replicate the results claimed in the Ledger-Hedger paper, we instantiated the model with the following parameters (the instantiation can be found in `Parameters.hs`):
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `wealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `wealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
-| `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract | $10^9$           |
-| `payment`      | payment               | The payment **Buyer** makes to **Seller** when LH contract is concluded. | $100$            |
+| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
+| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
+| `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0.1 \cdot 10^6$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $75 \cdot 10^3$  |
 | `gasDone`      | $g_{done}$            | Cost of closing a LH contract. | $20 \cdot 10^3$  |
 | `gasAllocTX`   | $g_{alloc}$           | Gas reserved in the LH contract. | $5 \cdot 10^6$   |
 | `gasPub`   | $g_{pub}$           | Gas size of the TX if issued at current market price. | $5 \cdot 10^6$   |
+| `piInitial` | $\pi_{initial}$ | Initial gas price | 100
+
 
 These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed what the authors did by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(x)$. These function represent risk-aversity.
+
+Moreover, as specified in the section [Assumptions made explicit](#assumptions-made-explicit), we had to postulate an explicit utility for the transaction that **Buyer** wants to issue. This is represented by the parameter `utilityFromTX`, which has been set to $10^9$.
+
 
 As for future price distribution, we defined it as `testDistribution`: This is a normal distribution centered around the initial gas price. Again, we used the standard deviations suggested in the paper. Moreover, we defined `testActionSpaceGasPub`, representing the range in which $g_{pub}$ can swing. $g_{pub}$ is the gas consumed if **Buyer** decides to issue the transaction at market price, thus without resorting to Ledger-Hedger. In practice, we followed the paper and equated $g_{pub}$ and $g_{alloc}$, meaning that **Buyer** is using Ledger-Hedger to reserve the precise amount of gas needed to execute the transaction.
 
@@ -609,22 +635,23 @@ In this scenario, both Players will be much more willing to use Ledger-Hedger, a
 
 ## Other analyses
 
-We ran also some other analyses. First of all, and unsurprisingly, we found out that running the model with the following parameters results in a much bigger utility:
+We ran also some other analyses these can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). First of all, and unsurprisingly, we found out that running the model with the following parameters results in a much bigger utility:
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
 | `wealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
 | `wealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract | $10^9$           |
-| `payment`      | payment               | The payment **Buyer** makes to **Seller** when LH contract is concluded. | $100$            |
+| `piContract`      | $\pi_{contract}$               | The payment **Buyer** makes to **Seller** when LH contract is concluded. | $100$            |
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $0$  |
 | `gasDone`      | $g_{done}$            | Cost of closing a LH contract. | $0$  |
 | `gasAllocTX`   | $g_{alloc}$           | Gas reserved in the LH contract. | $5 \cdot 10^6$   |
 | `gasPub`   | $g_{pub}$           | Gas size of the TX if issued at current market price. | $5 \cdot 10^6$   |
+| `piInitial` | $\pi_{initial}$ | Initial gas price | 100
 
-This represents the scenario where we dispense of the platform fees altogether. Most likely, this scenario hadn't been considered in the original paper as the original work was meant to be part of some on-chain infrastructure. As such, what we call 'platform fees' would just be unavoidable smart contract execution costs.
+This represents the scenario where we dispense of the platform fees altogether, and pay for `gasAllocTX` exactly the current price. Most likely, this scenario hadn't been considered in the original paper as the original work was meant to be part of some on-chain infrastructure. As such, what we call 'platform fees' would just be unavoidable smart contract execution costs.
 
 Keeping everything fixed, we then turned `payment` into a parameter. In the $\sqrt x$ case, we verified that in this setting the equilibrium is solid within the bound:
 
@@ -639,12 +666,14 @@ That is, these represent the maximum and minimum `payment` parameters within whi
 
 Using both the original paper parameters and the 'zero fees' parameters, we then ran a multivariate analysis on player's risk aversity. In practice, we generalized the $\sqrt x$ function, up to now being used by both players, to the couple of functions
 
-$$\Large x^{y_{\mathbf{Buyer}}} \qquad x^{y_{\mathbf{Seller}}}$$
+$$\Large x^{\frac{1}{y_{\mathbf{Buyer}}}} \qquad x^{\frac{1}{y_{\mathbf{Seller}}}}$$
 
 The concavity/convexity of these functions is dependent on the value of $y$, as shown in the following chart:
-![Alt text](x_exp_y.png)
+
+![Plotting x^{1/y} for different values of y](x_exp_y.png)
 
 Thus, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
-Positive values $< 1$ represent risk-aversity ,$1$ represent risk-neutrality, while values $> 1$ signal risk-loving.
+Positive values $< 1$ represent risk-love ,$1$ represents risk-neutrality, while values $> 1$ signal risk-aversity.
 
-Keeping all parameters fixed, the shaded region in the following graph represent where the equilibrium holds:
+Keeping all parameters fixed, the shaded region in the following graph represents where the equilibrium holds:
+

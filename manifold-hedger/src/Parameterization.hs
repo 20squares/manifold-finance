@@ -19,6 +19,7 @@ import           Data.Csv
 import qualified Data.Vector          as V
 import Numeric.Probability.Distribution (shape, norm, fromFreqs)
 import Numeric.Probability.Shape (normalCurve)
+import Types (Transaction(gasAllocTX))
 
 {-
 Defines the concrete parameterizations used for the analysis
@@ -32,11 +33,13 @@ testStrategy = Strategy
    initiateStrategyBuyerTarget
    noLHPublishStrategyTarget
    acceptStrategyTarget
+   recoupPublishTarget
    recoupStrategyTarget
    lhPublishStrategyPart1Target
    lhPublishStrategyPart2Target
    fulfillStrategyTarget
    noFulfillStrategyTarget
+   nofulfillPublishTarget
 
 testStrategyTupleTarget = completeStrategy testStrategy
 
@@ -45,7 +48,7 @@ testStrategyTupleTarget = completeStrategy testStrategy
 
 testContract payment gInit gAccept gDone = HLContract
    (10**9)
-   payment
+   (gasAllocTX testTransaction * 100)
    1
    gInit   -- NOTE: paper (0.1*10**6)
    gAccept -- NOTE: paper (75*10**3)
