@@ -47,16 +47,16 @@ testStrategyTupleTarget = completeStrategy testStrategy
 -- 2. Contract Parameters used
 
 testContract  = HLContract
-   (10**9)
-   (gasAllocTX testTransaction * 100)
-   1
-   (0.1*10**6)
-   (75*10**3)
-   (20*10**3)
+   (10**9)                                -- Collateral
+   (gasAllocTX testTransaction * 100)     -- Payment: piContract = 100
+   1                                      -- Epsilon
+   (0.1*10**6)                            -- GasInitiation
+   (75*10**3)                             -- GasAccept
+   (20*10**3)                             -- GasDone
 
 testTransaction = Transaction
-  (5 * 10**6)
-  (10**9)
+  (5 * 10**6)                             -- gasAllocTX
+  (10**9)                                 -- utilityFromTX
 
 --------------------------------------
 -- 3. Uncertainty and action space gas
@@ -82,13 +82,13 @@ squareRootUtility x = sqrt x
 parameters distribution = Parameters
   "buyer"
   "seller"
-  (10**9)
-  (10**9)
+  (10**9)                    -- buyerWealth
+  (10**9)                    -- sellerWealth
   distribution
   testActionSpaceGasPub
   testTransaction
   testContract
-  100
-  logUtility
-  logUtility
+  100                       -- piInitial
+  logUtility                -- utilityFunctionBuyer
+  logUtility                -- utilityFunctionSeller
 
