@@ -92,6 +92,6 @@ parameters distribution piContract gInit gAccept gDone exponentialBuyer exponent
   testActionSpaceGasPub
   testTransaction
   (testContract piContract gInit gAccept gDone)
-  100
-  (exponentialUtility exponentialBuyer)
-  (exponentialUtility exponentialSeller)
+  100                                         -- piInitial
+  (exponentialUtility exponentialBuyer)       -- utilityFunctionBuyer
+  (exponentialUtility exponentialSeller)      -- utilityFunctionSeller
