@@ -30,6 +30,7 @@
 - [Analytics](#analytics)
     - [Strategies employed in the analysis](#strategies-employed-in-the-analysis)
     - [Reading the analytics](#reading-the-analytics)
+    - [Running the analytics](#running-the-analytics)
     - [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results)
     - [Other analyses](#other-analyses)
       - [Sanity checks](#sanity-checks)
@@ -398,8 +399,8 @@ So, for instance, if our model consists of three subgames, a strategy for the wh
 
 #### Evaluating strategies
 
-To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`. In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a REPL (Cf. [Interactive Execution](#interactive-execution)) and give the command 'main'.
-You can make parametric changes in `Parametrization.hs` or even define new strategies and/or notions of equilibrium by editing `Stategies.hs` and `Analytics.hs`, respectively. Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
+To evaluate strategies, it is enough to just run the `main` function defined in `Main.hs`. This is precisely what happens when we give the command `stack run`. In turn, `main` invokes functions defined in `Analytics.hs` which define the right notion of equilibrium to check. If you want to change strategies on the fly, just open a REPL (Cf. [Interactive Execution](#interactive-execution)) and give the command `main`.
+You can make parametric changes or even define new strategies and/or notions of equilibrium by editing the relevant files (cf. [File structure](#file-structure)). Once you save your edits, giving `:r` will recompile the code on the fly. Calling `main` again will evaluate the changes.
 
 
 #### Stochasticity
@@ -418,7 +419,7 @@ strategyName
        Stochastic
        (Parameter1, Parameter2)
        Decision
-acceptStrategy = pureAction Decision1
+strategyName = pureAction Decision1
 ```
 
 In the example above, the player observes some parameters (`Parameter1` and `Parameter2` in this particular case), and then must assign an action (in this case `Decision1`).
@@ -601,9 +602,10 @@ nofulfillPublishTarget =  Kleisli (\(tx,_ ) -> playDeterministically $ Publish (
 
 As detailed in [File structure](#file-structure), the strategies above reside in `Strategies.hs`. For more information about how to supply strategies and/or how to make changes, please refer to the section [Supplying Strategies](#supplying-strategies).
 
-## Running strategies
+## Running the analytics
 
-There are two main ways to run strategies. In the [Normal execution](#normal-execution) mode, one just needs to give the command `stack run`. This command will execute a pre-defined battery of strategies using the parameters defined in `Parameters.hs`. These parameters can be varied as one pleses. Once this is done and the edits are saved, `stack run` will automatically recompile the code and run the simulation with the new parameter set.
+
+As already stressed in [Evaluating strategies](#evaluating-strategies), there are two main ways to run strategies. In the [Normal execution](#normal-execution) mode, one just needs to give the command `stack run`. This command will execute a pre-defined battery of strategies using the parameters predefined in the source code. These parameters can be varied as one pleses. Once this is done and the edits are saved, `stack run` will automatically recompile the code and run the simulation with the new parameter set.
 
 In the [Interactive execution](#interactive-execution) mode, the users accesses the repl via the command `stack ghci`. Here one can run single functions by just calling them with the relevant parameters, as in:
 
@@ -611,7 +613,8 @@ In the [Interactive execution](#interactive-execution) mode, the users accesses 
 functionName parameters
 ```
 
-In particular, calling the function `main` in interactive mode will result in the same behavior of calling `stack run` in normal mode.
+In particular, calling the function `main` in interactive mode will result in the same behavior of calling `stack run` in normal mode. Again, editing the source code and then hitting `:r` will trigger recompilation on the fly.
+
 
 ## Replicating the Ledger-Hedger paper results 
 
