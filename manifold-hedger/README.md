@@ -714,6 +714,7 @@ $$
 \text{Paper fees scenario:} \qquad 0.94 \leq y_{\mathbf{Buyer}} \qquad 7.09 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
+
 This is compatible with the idea that the lower the fees the less risk averse players must be to judge the use of Ledger-Hedger convenient.
 
 Setting $\texttt{piContract} = 99$, we get the following graph:
