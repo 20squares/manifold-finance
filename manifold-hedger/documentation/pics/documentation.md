@@ -44,7 +44,7 @@ This project implements the model detailed in the [Ledger-Hedger](https://eprint
 
 A more detailed analysis can be found in the section [Analytics](#analytics).
 
-First of all, we replicated the analysis outlined in the paper. We used the same parameters provided there, and verified equilibrium.
+First of all, we replicated the analysis outlined in the paper. We used the same parameters provided there, and verified the equilibrium.
 
 In general, we found that the game-theoretic scenarios detailed in the paper are a bit fragile, and incentives to prefer Ledger-Hedger swing within a close margin.
 
@@ -63,7 +63,7 @@ Summarizing, our main findings are the following:
 - Varying the price at which **Buyer** reserves the gas, called $\pi_{contract}$ in the paper, won't help much, since this parameter constitutes revenue for **Seller** but a cost for **Buyer**. So the more we make it convenient for the former, the less we make it convenient for the latter, and vice-versa.
 - As it is instantiated, the protocol is brittle. Even small changes in the standard deviation of future gas price distribution can break the equilibrium.
 - To make the protocol more robust, the only viable option is lowering the fees for the usage of the platform, which constitute a cost both for **Buyer** and for **Seller**.
-- Finally, we hypothesize that the situation could change if **Buyer** and **Seller** have differential, private information about the future gas price distribution. That is, the future gas price distribution is not anymore assumed to be a normal curve centered around the current price. This has not been simulated yet, as it was not included in the current working package.
+- Finally, we hypothesize that the situation could change if **Buyer** and **Seller** have differential, private information about the future gas price distribution. That is, the future gas price distribution is not anymore assumed to be a normal distribution centered around the current price. This has not been simulated yet, as it was not included in the current working package.
 
 
 # Installation
@@ -147,7 +147,7 @@ As our model is based on the Ledger-Hedger paper, we start by briefly recalling 
 
 ### Ledger-Hedger: Players and phases
 
-The fact that gas price varies with market conditions, generally rising when demand is high and falling when demand is low, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, this can be a problem for miners, which may be unable to forecast their future profits. Ledger-Hedger provides a mechanism to address this problem. We consider a system with two participants:
+The fact that gas price varies with market conditions, generally rising when demand is high and falling when demand is low, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, this can be a problem for miners, who may be unable to forecast their future profits. Ledger-Hedger provides a mechanism to address this problem. We consider a system with two participants:
 
 - **Buyer**, that wants to issue a given transaction in a future block interval $start<end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
@@ -199,7 +199,7 @@ In formalizing Ledger-Hedger, we had to make some assumptions, that were kept im
 
 ### Refined payoffs
 
-First of all, the payoff types had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. This is represents the desire for **Buyer** to see the transaction included in a block and is one of the main drivers to use Ledger-Hedger in the first place. 
+First of all, the payoff types had to be refined: Whereas for some actions such as $Confirm$ or $Exhaust$ it is very clear how much **Seller** gains, in cases such as $No-op$ the utility is not specified: If one supposes that in this case the payoff is simply 0 (no gas gets spent whatsoever), then **Buyer** would default to $Wait$ and $No-op$ all the time. We had to assume, then, that the transaction that **Buyer** wants to issue has some *intrinsic utility*. This represents the desire for **Buyer** to see the transaction included in a block and is one of the main drivers to use Ledger-Hedger in the first place. 
 
 In our model, a transaction is defined as a record of type:
 
@@ -211,9 +211,9 @@ data Transaction = Transaction
 ```
 here, `utilityFromTX` is the *intrinsic utility* of the transaction.
 
-Another problem that required attention is the overall payoff structure. Ledger-Hedger is an interactive mechanism composed of various subgames, where a player choice determines the subgame that gets played next. This defines a tree-like structure, and payoffs are defined with respect to *game flows*, that is, a different payoff is defined for each one of the possible branches. This is in contrast with the usual approach of defining an *outcome space* (that is, a space representing all the posible outcomes of the overall game) and then defining payoffs on it (as function from this space to, say, the real numbers). 
+Another problem that required attention is the overall payoff structure. Ledger-Hedger is an interactive mechanism composed of various subgames, where a player choice determines the subgame that gets played next. This defines a tree-like structure, and payoffs are defined with respect to *game flows*, that is, a different payoff is defined for each one of the possible branches. This is in contrast with the usual approach of defining an *outcome space* (that is, a space representing all the posible outcomes of the overall game) and then defining payoffs on it (as function from this space to, say, the real numbers).
 
-Adopting this flow perspective, things change a great deal if one decides to add payoffs 'as things progress' or if one calculates them only when the end of a branch is reached. 
+Adopting this flow perspective, things change a great deal if one decides to add payoffs 'as things progress' or if one calculates them only when the end of a branch is reached.
 
 In the first case, payoffs can become negative at some stages of the game: For instance, in the subgame **AcceptLH**, **Seller** gets a negative payoff when the $Accept$ decision is taken. Clearly, this allows the game to progress and **Seller** will be able to recoup the collateral together with the mining fee later on, making the payoff positive overall.
 
@@ -257,7 +257,7 @@ In the Ledger-Hedger paper, players are considered to be risk-averse or at best 
  - A risk-averse **Buyer** seeks protection against the possibility of prices rising, resulting in bigger expenses;
  - A risk-averse **Seller** seeks protection against the possibility of prices falling, resulting in less profit.
 
-To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a  couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result in the standard risk-neutral case.
+To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result in the standard risk-neutral case.
 
 Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`
 
@@ -338,11 +338,11 @@ gameName variables = [opengame|
 
 In turn, `Subgame1` and `Subgame2` can be other games defined using the same DSL. Notice that the wire `x` is internal and totally hidden from the 'outside world'. 
 
-### Exhogenous parameters
+### Exogenous parameters
 
-An exogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exhogenous parameter could be the market conditions at the time when a game is played.
+An exogenous parameter is a given assumption that is not part of the model, and is fed to it externally. As such, it is treated by the model as a 'fact' that cannot really be modified. An example of exogenous parameter could be the market conditions at the time when a game is played.
 
-Exhogenous parameters are just defined as variables, as the field `variables` in the previous code blocks testifes. These variables can in turn be fed as exhogenous parameters to inside games, as in the following example:
+Exogenous parameters are just defined as variables, as the field `variables` in the previous code blocks testifes. These variables can in turn be fed as exogenous parameters to inside games, as in the following example:
 
 ```haskell
 gameName stock1Price stock2Price  = [opengame|
@@ -470,7 +470,7 @@ Now, we switch focus on *analytics*, which we defined as the set of techniques w
 
 ## Reading the analytics
 
-Analytics in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in eqilibrium`.
+Analytics in our model are quite straightforward. In case a game is in equilibrium, the terminal will print `Strategies are in equilibrium`.
 
 For games with branching, there will also be a `NOTHING CASE`. To understand this, consider a game (call it `First Game`) that can trigger two different subgames (`Subgame branch 1`, `Subgame branch 2`, respectively) depending on the player's choice. Analytics would read like this:
 
@@ -604,8 +604,7 @@ As detailed in [File structure](#file-structure), the strategies above reside in
 
 ## Running the analytics
 
-
-As already stressed in [Evaluating strategies](#evaluating-strategies), there are two main ways to run strategies. In the [Normal execution](#normal-execution) mode, one just needs to give the command `stack run`. This command will execute a pre-defined battery of strategies using the parameters predefined in the source code. These parameters can be varied as one pleses. Once this is done and the edits are saved, `stack run` will automatically recompile the code and run the simulation with the new parameter set.
+As already stressed in [Evaluating strategies](#evaluating-strategies), there are two main ways to run strategies. In the [Normal execution](#normal-execution) mode, one just needs to give the command `stack run`. This command will execute a pre-defined battery of strategies using the parameters predefined in the source code. These parameters can be varied as one pleases. Once this is done and the edits are saved, `stack run` will automatically recompile the code and run the simulation with the new parameter set.
 
 In the [Interactive execution](#interactive-execution) mode, the users accesses the repl via the command `stack ghci`. Here one can run single functions by just calling them with the relevant parameters, as in:
 
@@ -624,8 +623,8 @@ To replicate the results highlighted in the Ledger-Hedger paper, we instantiated
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `buyerWealth`  | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
+| `sellerWealth` | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
 | `piInitial` | $\pi_{initial}$ | Initial gas price | $100$
 | `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
@@ -642,7 +641,7 @@ These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As
 
 Moreover, as specified in the section [Assumptions made explicit](#assumptions-made-explicit), we had to postulate an explicit utility for the transaction that **Buyer** wants to issue. This is represented by the parameter `utilityFromTX`, which has been set to $10^9$.
 
-As for future price distribution, we defined it in csv format in the file `/probability/distribution.csv` ((we also provide a constant distribution, `/probability/distributionOneElement.csv` for debugging reasons). `distribution.csv` is a normal distribution centered around the initial gas price. Again, we used the standard deviations suggested in the paper. 
+As for the future price distribution, we defined it in csv format in the file `/probability/distribution.csv` (we also provide a constant distribution, `/probability/distributionOneElement.csv` for debugging reasons). As the distribution is input through this external file, any other distribution (e.g. based on actual data) can be used. `distribution.csv` is a normal distribution centered around the initial gas price. Again, we used the standard deviations suggested in the paper. 
 
 Moreover, we defined `testActionSpaceGasPub`, representing the range in which $g_{pub}$ can swing. $g_{pub}$ is the gas consumed if **Buyer** decides to issue the transaction at market price (for more information see [Ambiguous **Buyer** behavior](#ambiguous-buyer-behavior)). In practice, we followed the paper and equated $g_{pub}$ and $g_{alloc}$, meaning that **Buyer** is using Ledger-Hedger to reserve the precise amount of gas needed to execute the transaction.
 
@@ -665,7 +664,7 @@ In this scenario, both Players will be much more willing to use Ledger-Hedger, a
 
 We ran also some other analyses these can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). 
 
-First of all, and unsurprisingly, we found out that running the model with the following parameters results in a much bigger utility:
+First of all, and unsurprisingly, we found that running the model with the following parameters results in a much bigger utility:
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
@@ -736,4 +735,4 @@ Finally, in the `eq-breaking` branch there are more things one can do, the most 
 interactiveMain piContract utilityParameterBuyer utilityParameterSeller
 ```
 
-allows to run the Ledger-Hedger strategy on both the 'zero fees' and 'paper fees' scenarios, with customized `piContract` and risk-aversity parameters for both players. In ths way, the user can verify equilibria for particular choices of values without the need to recompile.
+allows to run the Ledger-Hedger strategy on both the 'zero fees' and 'paper fees' scenarios, with customized `piContract` and risk-aversity parameters for both players. In this way, the user can verify equilibria for particular choices of values without the need to recompile.
