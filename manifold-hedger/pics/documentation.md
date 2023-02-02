@@ -154,7 +154,7 @@ The fact that gas price varies with market conditions, generally rising when dem
 
 This mechanism defines an interactive game articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
 
-![Ledger-Hedger statespace](pics/game_statespace.png)
+![Ledger-Hedger statespace](game_statespace.png)
 
 Let us give a more detailed view of all the moving components in this picture.
 
@@ -306,7 +306,7 @@ We can imagine this block as a box with 4 wires on its outside, on which travels
 
 The `:--:` delimiters separate the outside from the inside of the box. As one can see, the interfaces inside are replicated. This is intentional as it allows for a notion of *nesting*. For instance, the situation depicted in the following picture:
 
-![An open grame in graphical form](pics/box.png)
+![An open grame in graphical form](box.png)
 
 Can be represented by the following code block:
 
@@ -695,7 +695,7 @@ $$\Large x^{\frac{1}{y_{\mathbf{Buyer}}}} \qquad x^{\frac{1}{y_{\mathbf{Seller}}
 
 The concavity/convexity of these functions is dependent on the value of $y$, as shown in the following chart:
 
-![Plotting x^{1/y} for different values of y](pics/x_exp_y.png)
+![Plotting x^{1/y} for different values of y](x_exp_y.png)
 
 Thus, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
 Positive values $< 1$ represent risk-love ,$1$ represents risk-neutrality, while values $> 1$ signal risk-aversity.
@@ -703,52 +703,20 @@ Positive values $< 1$ represent risk-love ,$1$ represents risk-neutrality, while
 Keeping all parameters fixed, the shaded region in the following graphs represents where the equilibrium holds for different risk-aversity ranges. 
 
 At $\texttt{piContract} = 98$, we get the following graph:
-![yBuyer/ySeller graph, piContract=98 ](pics/price_98.png)
-The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. We have:
-$$
-\begin{alignat*}{2}
-\text{\color{blue} Zero fees scenario:} \qquad  0.68 \leq y_{\mathbf{Buyer}} \qquad 1.92 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 0.94 \leq y_{\mathbf{Buyer}} \qquad 7.09 \leq y_{\mathbf{Seller}}
-\end{alignat*}
-$$
-
-This is compatible with the idea that the lower the fees the less risk averse players must be to judge the use of Ledger-Hedger convenient.
+![yBuyer/ySeller graph, piContract=98 ](price_98.png)
+The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. This is compatible with the idea that the lower the fees the less risk averse players must be to judge the use of Ledger-Hedger convenient.
 
 Setting $\texttt{piContract} = 99$, we get the following graph:
-$$
-\begin{alignat*}{2}
-\text{\color{blue} Zero fees scenario:} \qquad  0.79 \leq y_{\mathbf{Buyer}} \qquad 1.39 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 1.16 \leq y_{\mathbf{Buyer}} \qquad 2.93 \leq y_{\mathbf{Seller}}
-\end{alignat*}
-$$
-![yBuyer/ySeller graph, piContract=99 ](pics/price_99.png)
+![yBuyer/ySeller graph, piContract=99 ](price_99.png)
 
 For $\texttt{piContract} = 100$:
-$$
-\begin{alignat*}{2}
-\text{\color{blue} Zero fees scenario:} \qquad  0.94 \leq y_{\mathbf{Buyer}} \qquad 1.08 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 1.50 \leq y_{\mathbf{Buyer}} \qquad 1.85 \leq y_{\mathbf{Seller}}
-\end{alignat*}
-$$
-![yBuyer/ySeller graph, piContract=100](pics/price_100.png)
+![yBuyer/ySeller graph, piContract=100](price_100.png)
 
 For $\texttt{piContract} = 101$:
-$$
-\begin{alignat*}{2}
-\text{\color{blue} Zero fees scenario:} \qquad  1.16 \leq y_{\mathbf{Buyer}} \qquad 0.89 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 2.15 \leq y_{\mathbf{Buyer}} \qquad 1.35 \leq y_{\mathbf{Seller}}
-\end{alignat*}
-$$
-![yBuyer/ySeller graph, piContract=101](pics/price_101.png)
+![yBuyer/ySeller graph, piContract=101](price_101.png)
 
 For $\texttt{piContract} = 102$:
-$$
-\begin{alignat*}{2}
-\text{\color{blue} Zero fees scenario:} \qquad  1.50 \leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 3.77 \leq y_{\mathbf{Buyer}} \qquad 1.06 \leq y_{\mathbf{Seller}}
-\end{alignat*}
-$$
-![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
+![yBuyer/ySeller graph, piContract=102](price_102.png)
 
 As one can see, as `piContract` increases the shaded regions migrate to the lower-right end. Again, this makes sense: As the price goes higher, **Buyer** is paying more and more for `gasAllocTX` with respect to current price. This entails that **Buyer** should be more risk-averse to deemm this advantageous, and hence the region moves further to the right on the **Buyer** axis. Specularly, **Seller** is receiving an increasingly better offer compared to the current price, lowering the necessity for risk-aversity. As such, the region grows closer to the **Seller** axis.
 
