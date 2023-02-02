@@ -437,8 +437,8 @@ As a word of caution notice that, in a game with branching, we need to provide a
 
 Moreover, suppose that the payoffs are as follows: 
 
-- If Player1 chooses A, and then Player2 chooses A1, then both players get 100$.
-- In any other case, both players get 0$.
+- If Player1 chooses A, and then Player2 chooses A1, then both players get $100$.
+- In any other case, both players get $0$.
 
 In this game the best strategy is clearly (A,A1). Nevertheless, we need to supply a strategy for Player2 also in the 'B' branch: Even if Player1 will never rationally choose B, Player2 needs to be endowed with a clear choice between B1 and B2 in case this happens.
 
@@ -698,7 +698,7 @@ The concavity/convexity of these functions is dependent on the value of $y$, as 
 ![Plotting x^{1/y} for different values of y](pics/x_exp_y.png)
 
 Thus, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
-Positive values $< 1$ represent risk-love ,$1$ represents risk-neutrality, while values $> 1$ signal risk-aversity.
+Positive values $< 1$ represent risk-love, $1$ represents risk-neutrality, while values $> 1$ signal risk-aversity.
 
 Keeping all parameters fixed, the shaded region in the following graphs represents where the equilibrium holds for different risk-aversity ranges. 
 
