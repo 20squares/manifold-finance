@@ -754,6 +754,7 @@ $$
 $$
 \begin{alignat*}{1}
 \text{\color{blue} Zero fees scenario:} \qquad  1.50 &\leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}\\
+\text{\color{red} Paper fees scenario:} \qquad 3.77 &\leq y_{\mathbf{Buyer}} \qquad 1.06 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
 ![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
