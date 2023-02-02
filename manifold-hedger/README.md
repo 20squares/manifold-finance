@@ -744,6 +744,7 @@ $$
 ![yBuyer/ySeller graph, piContract=101](pics/price_101.png)
 
 For $\texttt{piContract} = 102$:
+
 $$
 \begin{alignat*}{3}
 &\text{\color{blue} Zero fees scenario:} \qquad  1.50 &&\leq y_{\mathbf{Buyer}} \qquad 0.75 &&\leq y_{\mathbf{Seller}}\\
