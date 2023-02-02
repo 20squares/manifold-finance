@@ -705,18 +705,17 @@ Keeping all parameters fixed, the shaded region in the following graphs represen
 At $\texttt{piContract} = 98$, we get the following graph:
 ![yBuyer/ySeller graph, piContract=98 ](pics/price_98.png)
 The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. We have:
-$$\begin{aligned}{2}
+
+$$
+\begin{aligned}{2}
 \text{Zero fees scenario:} \qquad  0.68 \leq y_{\mathbf{Buyer}} \qquad 1.92 \leq y_{\mathbf{Seller}}\\
 \text{Paper fees scenario:} \qquad 0.94 \leq y_{\mathbf{Buyer}} \qquad 7.09 \leq y_{\mathbf{Seller}}
-\end{aligned}$$
-$$\begin{aligned}{2}
-\text{\color{blue} Zero fees scenario:} \qquad  0.68 \leq y_{\mathbf{Buyer}} \qquad 1.92 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 0.94 \leq y_{\mathbf{Buyer}} \qquad 7.09 \leq y_{\mathbf{Seller}}
-\end{aligned}$$
-
+\end{aligned}
+$$
 This is compatible with the idea that the lower the fees the less risk averse players must be to judge the use of Ledger-Hedger convenient.
 
 Setting $\texttt{piContract} = 99$, we get the following graph:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  0.79 \leq y_{\mathbf{Buyer}} \qquad 1.39 \leq y_{\mathbf{Seller}}\\
@@ -726,6 +725,7 @@ $$
 ![yBuyer/ySeller graph, piContract=99 ](pics/price_99.png)
 
 For $\texttt{piContract} = 100$:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  0.94 \leq y_{\mathbf{Buyer}} \qquad 1.08 \leq y_{\mathbf{Seller}}\\
@@ -735,6 +735,7 @@ $$
 ![yBuyer/ySeller graph, piContract=100](pics/price_100.png)
 
 For $\texttt{piContract} = 101$:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  1.16 \leq y_{\mathbf{Buyer}} \qquad 0.89 \leq y_{\mathbf{Seller}}\\
@@ -749,13 +750,6 @@ $$
 \begin{alignat*}{3}
 &\text{\color{blue} Zero fees scenario:} \qquad  1.50 &&\leq y_{\mathbf{Buyer}} \qquad 0.75 &&\leq y_{\mathbf{Seller}}\\
 &\text{\color{red} Paper fees scenario:} \qquad 3.77 &&\leq y_{\mathbf{Buyer}} \qquad 1.06 &&\leq y_{\mathbf{Seller}}
-\end{alignat*}
-$$
-
-$$
-\begin{alignat*}{1}
-\text{\color{blue} Zero fees scenario:} \qquad  1.50 &\leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}\\
-\text{\color{red} Paper fees scenario:} \qquad 3.77 &\leq y_{\mathbf{Buyer}} \qquad 1.06 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
 ![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
