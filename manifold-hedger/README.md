@@ -753,7 +753,7 @@ $$
 
 $$
 \begin{alignat*}{1}
-test &\qquad test
+\text{\color{blue} Zero fees scenario:} \qquad  1.50 &\leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
 ![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
