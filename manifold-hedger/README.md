@@ -710,8 +710,8 @@ The blue region represents the 'zero fees' scenario, whereas the red region repr
 
 $$
 \begin{alignat*}{2}
-\text{Zero fees scenario:} \qquad  0.68 \leq y_{\mathbf{Buyer}} \qquad 1.92 \leq y_{\mathbf{Seller}}\\
-\text{Paper fees scenario:} \qquad 0.94 \leq y_{\mathbf{Buyer}} \qquad 7.09 \leq y_{\mathbf{Seller}}
+\text{\color{blue} Zero fees scenario:} \qquad  0.68 \leq y_{\mathbf{Buyer}} \qquad 1.92 \leq y_{\mathbf{Seller}}\\
+\text{\color{red} Paper fees scenario:} \qquad 0.94 \leq y_{\mathbf{Buyer}} \qquad 7.09 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
 
