@@ -703,6 +703,7 @@ Positive values $< 1$ represent risk-love, $1$ represents risk-neutrality, while
 Keeping all parameters fixed, the shaded region in the following graphs represents where the equilibrium holds for different risk-aversity ranges. 
 
 At $\texttt{piContract} = 98$, we get the following graph:
+
 ![yBuyer/ySeller graph, piContract=98 ](pics/price_98.png)
 The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. We have:
 
@@ -722,6 +723,7 @@ $$
 \text{\color{red} Paper fees scenario:} \qquad 1.16 \leq y_{\mathbf{Buyer}} \qquad 2.93 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
+
 ![yBuyer/ySeller graph, piContract=99 ](pics/price_99.png)
 
 For $\texttt{piContract} = 100$:
