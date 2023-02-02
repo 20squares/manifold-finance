@@ -159,7 +159,7 @@ This mechanism defines an interactive game articulated in two phases, called $\v
 Let us give a more detailed view of all the moving components in this picture.
 
 - Phase I happens in a timeframe ranging from the current block to a block called $acc$, by which **Seller** will have to either accept or reject **Buyer**'s offer.
-- Phase II happens within the block interval $start<end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and within which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
+- Phase II happens within the block interval $start < end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and within which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
 
 ### Ledger-Hedger: The subgame space
 
