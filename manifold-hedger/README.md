@@ -165,7 +165,7 @@ Let us give a more detailed view of all the moving components in this picture.
 
 Let us now describe the subgame space:
 - **InitLH** is where **Buyer** can decide to either use or not use Leger-Hedger.
-    - In the former case ($Wait$), **Buyer** just has to wait until $start$;
+    - In the former case ( $Wait$ ), **Buyer** just has to wait until $start$;
     - In the latter case ($Initiate$), buyer initiates the mechanism by:
         - Paying an amount $SentTokens$.
         - Specifying $acc$, the block number by which **Seller** must accept **Buyer**'s request. This effectively fixes when Phase I will end.
