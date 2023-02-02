@@ -149,7 +149,7 @@ As our model is based on the Ledger-Hedger paper, we start by briefly recalling 
 
 The fact that gas price varies with market conditions, generally rising when demand is high and falling when demand is low, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, this can be a problem for miners, who may be unable to forecast their future profits. Ledger-Hedger provides a mechanism to address this problem. We consider a system with two participants:
 
-- **Buyer**, that wants to issue a given transaction in a future block interval $start<end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
+- **Buyer**, that wants to issue a given transaction in a future block interval $ start<end $. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
 
 This mechanism defines an interactive game articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
