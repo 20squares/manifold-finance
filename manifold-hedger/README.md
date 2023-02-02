@@ -742,7 +742,14 @@ $$
 ![yBuyer/ySeller graph, piContract=101](pics/price_101.png)
 
 For $\texttt{piContract} = 102$:
-$$\begin{alignat*}{2}\text{\color{blue} Zero fees scenario:} \qquad  1.50 \leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}\\\text{\color{red} Paper fees scenario:} \qquad 3.77 \leq y_{\mathbf{Buyer}} \qquad 1.06 \leq y_{\mathbf{Seller}}\end{alignat*}$$
+
+$
+\begin{alignat*}{2}
+\text{\color{blue} Zero fees scenario:} \qquad  1.50 \leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}\\
+\text{\color{red} Paper fees scenario:} \qquad 3.77 \leq y_{\mathbf{Buyer}} \qquad 1.06 \leq y_{\mathbf{Seller}}
+\end{alignat*}
+$
+
 ![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
 
 As one can see, as `piContract` increases the shaded regions migrate to the lower-right end. Again, this makes sense: As the price goes higher, **Buyer** is paying more and more for `gasAllocTX` with respect to current price. This entails that **Buyer** should be more risk-averse to deemm this advantageous, and hence the region moves further to the right on the **Buyer** axis. Specularly, **Seller** is receiving an increasingly better offer compared to the current price, lowering the necessity for risk-aversity. As such, the region grows closer to the **Seller** axis.
