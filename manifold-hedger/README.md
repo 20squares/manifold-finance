@@ -166,7 +166,7 @@ Let us give a more detailed view of all the moving components in this picture.
 Let us now describe the subgame space:
 - **InitLH** is where **Buyer** can decide to either use or not use Leger-Hedger.
     - In the former case ( $Wait$ ), **Buyer** just has to wait until $start$;
-    - In the latter case ($Initiate$), buyer initiates the mechanism by:
+    - In the latter case ( $Initiate$ ), buyer initiates the mechanism by:
         - Paying an amount $SentTokens$.
         - Specifying $acc$, the block number by which **Seller** must accept **Buyer**'s request. This effectively fixes when Phase I will end.
         - Specifying $start < end$, the block interval within which **Buyer** wants to execute the transaction.
@@ -176,20 +176,20 @@ Let us now describe the subgame space:
         - All the above-mentioned parameters are fixed only once, and then are considered immutable. As it will become clear soon, the gas price **Buyer** is offering, which in the paper is denoted $\pi_{contract}$, can be calculated as: $$\pi_{contract} := \frac{SentTokens}{g_{alloc}}$$
 
 - **AcceptLH**, where **Seller** must decide if accepting or declining **Buyer**'s offer.
-    - In the former case ($Decline$), **Seller** simply waits.
-    - In the latter case ($Accept$), **Seller** commits the collateral $col$.
+    - In the former case ( $Decline$ ), **Seller** simply waits.
+    - In the latter case ( $Accept$ ), **Seller** commits the collateral $col$.
 - **Nature draws** is when Phase II starts, and the market gas price $\pi_{exec}$ becomes known. This may be higher or lower than $\pi_{contract}$.
 
-- **NoLH** is the subgame resulting from **Buyer** not having used Ledger-Hedger. Here **Buyer** can decide to either publish the transaction anyway ($Publish$), which gets confirmed at market price, or to not publish the transaction ($No-op$).
+- **NoLH** is the subgame resulting from **Buyer** not having used Ledger-Hedger. Here **Buyer** can decide to either publish the transaction anyway ( $Publish$ ), which gets confirmed at market price, or to not publish the transaction ( $No-op$ ).
 - **RecoupLH** is the subgame where **Buyer**'s proposition was not accepted. **Buyer** can either:
-    - Choose to Recoup the funds ($Recoup$), in which case **Buyer** receives back the amount $SentTokens$ in full.
-    - Choose to not recoup the funds ($Forfait$), in which case the amount $SentTokens$ is lost.
-- **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ($Publish$) or not ($No-op$).
+    - Choose to Recoup the funds ( $Recoup$ ), in which case **Buyer** receives back the amount $SentTokens$ in full.
+    - Choose to not recoup the funds ( $Forfeit$ ), in which case the amount $SentTokens$ is lost.
+- **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ( $Publish$ ) or not ( $No-op$ ).
 - **FullfillTX** is the subgame where **Seller** can:
-    - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$. Moreover, if the gas size of the transaction $g_{pub}$ ends up being lower than the reserved $g_{alloc}$, **Seller** can sell the difference $g_{alloc} - g_{pub}$ at market price.
-    - Exhaust the contract ($Exhaust$). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
+    - Confirm the transaction ( $Confirm$ ), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$. Moreover, if the gas size of the transaction $g_{pub}$ ends up being lower than the reserved $g_{alloc}$, **Seller** can sell the difference $g_{alloc} - g_{pub}$ at market price.
+    - Exhaust the contract ( $Exhaust$ ). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
     This is fundamental, as the lower payoff makes $Confirm$ a rationally better choice than $Exhaust$, thus incentivizing **Seller** not to 'betray' **Buyer**.
-    - Ignore the situation ($Ignore$) by not doing anything. This results in **Seller** losing their collateral $col$.
+    - Ignore the situation ( $Ignore$ ) by not doing anything. This results in **Seller** losing their collateral $col$.
 - **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never publishes the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
 
 
