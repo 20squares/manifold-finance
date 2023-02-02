@@ -149,7 +149,7 @@ As our model is based on the Ledger-Hedger paper, we start by briefly recalling 
 
 The fact that gas price varies with market conditions, generally rising when demand is high and falling when demand is low, can be a problem for some transaction issuers, that would like to reserve a a fixed gas price beforehand. Similarly, this can be a problem for miners, who may be unable to forecast their future profits. Ledger-Hedger provides a mechanism to address this problem. We consider a system with two participants:
 
-- **Buyer**, that wants to issue a given transaction in a future block interval $start<end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
+- **Buyer**, that wants to issue a given transaction in a future block interval $start < end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
 
 This mechanism defines an interactive game articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
@@ -159,14 +159,14 @@ This mechanism defines an interactive game articulated in two phases, called $\v
 Let us give a more detailed view of all the moving components in this picture.
 
 - Phase I happens in a timeframe ranging from the current block to a block called $acc$, by which **Seller** will have to either accept or reject **Buyer**'s offer.
-- Phase II happens within the block interval $start<end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and within which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
+- Phase II happens within the block interval $start < end$. Again, this is the block interval within which **Buyer** wants their transaction executed, and within which **Seller** has gas space to offer. We postulate that $$now < acc < start < end$$
 
 ### Ledger-Hedger: The subgame space
 
 Let us now describe the subgame space:
 - **InitLH** is where **Buyer** can decide to either use or not use Leger-Hedger.
-    - In the former case ($Wait$), **Buyer** just has to wait until $start$;
-    - In the latter case ($Initiate$), buyer initiates the mechanism by:
+    - In the former case ( $Wait$ ), **Buyer** just has to wait until $start$;
+    - In the latter case ( $Initiate$ ), buyer initiates the mechanism by:
         - Paying an amount $SentTokens$.
         - Specifying $acc$, the block number by which **Seller** must accept **Buyer**'s request. This effectively fixes when Phase I will end.
         - Specifying $start < end$, the block interval within which **Buyer** wants to execute the transaction.
@@ -176,20 +176,20 @@ Let us now describe the subgame space:
         - All the above-mentioned parameters are fixed only once, and then are considered immutable. As it will become clear soon, the gas price **Buyer** is offering, which in the paper is denoted $\pi_{contract}$, can be calculated as: $$\pi_{contract} := \frac{SentTokens}{g_{alloc}}$$
 
 - **AcceptLH**, where **Seller** must decide if accepting or declining **Buyer**'s offer.
-    - In the former case ($Decline$), **Seller** simply waits.
-    - In the latter case ($Accept$), **Seller** commits the collateral $col$.
+    - In the former case ( $Decline$ ), **Seller** simply waits.
+    - In the latter case ( $Accept$ ), **Seller** commits the collateral $col$.
 - **Nature draws** is when Phase II starts, and the market gas price $\pi_{exec}$ becomes known. This may be higher or lower than $\pi_{contract}$.
 
-- **NoLH** is the subgame resulting from **Buyer** not having used Ledger-Hedger. Here **Buyer** can decide to either publish the transaction anyway ($Publish$), which gets confirmed at market price, or to not publish the transaction ($No-op$).
+- **NoLH** is the subgame resulting from **Buyer** not having used Ledger-Hedger. Here **Buyer** can decide to either publish the transaction anyway ( $Publish$ ), which gets confirmed at market price, or to not publish the transaction ( $No-op$ ).
 - **RecoupLH** is the subgame where **Buyer**'s proposition was not accepted. **Buyer** can either:
-    - Choose to Recoup the funds ($Recoup$), in which case **Buyer** receives back the amount $SentTokens$ in full.
-    - Choose to not recoup the funds ($Forfait$), in which case the amount $SentTokens$ is lost.
-- **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ($Publish$) or not ($No-op$).
+    - Choose to Recoup the funds ( $Recoup$ ), in which case **Buyer** receives back the amount $SentTokens$ in full.
+    - Choose to not recoup the funds ( $Forfeit$ ), in which case the amount $SentTokens$ is lost.
+- **PublishTx** is the subgame where **Buyer** can decide to either publish the transaction ( $Publish$ ) or not ( $No-op$ ).
 - **FullfillTX** is the subgame where **Seller** can:
-    - Confirm the transaction ($Confirm$), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$. Moreover, if the gas size of the transaction $g_{pub}$ ends up being lower than the reserved $g_{alloc}$, **Seller** can sell the difference $g_{alloc} - g_{pub}$ at market price.
-    - Exhaust the contract ($Exhaust$). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
+    - Confirm the transaction ( $Confirm$ ), thus receiving back the collateral $col$ together with the amount $SentTokens$. In practice, **Seller** executes the transaction at gas price $\pi_{contract}$. Moreover, if the gas size of the transaction $g_{pub}$ ends up being lower than the reserved $g_{alloc}$, **Seller** can sell the difference $g_{alloc} - g_{pub}$ at market price.
+    - Exhaust the contract ( $Exhaust$ ). In practice this means that **Seller** will replace the transaction execution trace with a bunch of null operations. In doing so, **Seller** receives $$SentTokens - \epsilon$$
     This is fundamental, as the lower payoff makes $Confirm$ a rationally better choice than $Exhaust$, thus incentivizing **Seller** not to 'betray' **Buyer**.
-    - Ignore the situation ($Ignore$) by not doing anything. This results in **Seller** losing their collateral $col$.
+    - Ignore the situation ( $Ignore$ ) by not doing anything. This results in **Seller** losing their collateral $col$.
 - **FullFillNoTx** is a subgame similar to **PublishTx**, but in this case **Buyer** never publishes the transaction. In this case, the only available options for **Seller** are $Exhaust$ and $Ignore$, that work as above.
 
 
@@ -437,8 +437,8 @@ As a word of caution notice that, in a game with branching, we need to provide a
 
 Moreover, suppose that the payoffs are as follows: 
 
-- If Player1 chooses A, and then Player2 chooses A1, then both players get 100$.
-- In any other case, both players get 0$.
+- If Player1 chooses A, and then Player2 chooses A1, then both players get $100$.
+- In any other case, both players get $0$.
 
 In this game the best strategy is clearly (A,A1). Nevertheless, we need to supply a strategy for Player2 also in the 'B' branch: Even if Player1 will never rationally choose B, Player2 needs to be endowed with a clear choice between B1 and B2 in case this happens.
 
@@ -698,13 +698,16 @@ The concavity/convexity of these functions is dependent on the value of $y$, as 
 ![Plotting x^{1/y} for different values of y](pics/x_exp_y.png)
 
 Thus, $y_{\mathbf{Buyer}}$ and $y_{\mathbf{Seller}}$ represent the risk-aversity of both players, respectively.
-Positive values $< 1$ represent risk-love ,$1$ represents risk-neutrality, while values $> 1$ signal risk-aversity.
+Positive values $< 1$ represent risk-love, $1$ represents risk-neutrality, while values $> 1$ signal risk-aversity.
 
 Keeping all parameters fixed, the shaded region in the following graphs represents where the equilibrium holds for different risk-aversity ranges. 
 
 At $\texttt{piContract} = 98$, we get the following graph:
+
 ![yBuyer/ySeller graph, piContract=98 ](pics/price_98.png)
+
 The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. We have:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  0.68 \leq y_{\mathbf{Buyer}} \qquad 1.92 \leq y_{\mathbf{Seller}}\\
@@ -715,39 +718,47 @@ $$
 This is compatible with the idea that the lower the fees the less risk averse players must be to judge the use of Ledger-Hedger convenient.
 
 Setting $\texttt{piContract} = 99$, we get the following graph:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  0.79 \leq y_{\mathbf{Buyer}} \qquad 1.39 \leq y_{\mathbf{Seller}}\\
 \text{\color{red} Paper fees scenario:} \qquad 1.16 \leq y_{\mathbf{Buyer}} \qquad 2.93 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
+
 ![yBuyer/ySeller graph, piContract=99 ](pics/price_99.png)
 
 For $\texttt{piContract} = 100$:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  0.94 \leq y_{\mathbf{Buyer}} \qquad 1.08 \leq y_{\mathbf{Seller}}\\
 \text{\color{red} Paper fees scenario:} \qquad 1.50 \leq y_{\mathbf{Buyer}} \qquad 1.85 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
+
 ![yBuyer/ySeller graph, piContract=100](pics/price_100.png)
 
 For $\texttt{piContract} = 101$:
+
 $$
 \begin{alignat*}{2}
 \text{\color{blue} Zero fees scenario:} \qquad  1.16 \leq y_{\mathbf{Buyer}} \qquad 0.89 \leq y_{\mathbf{Seller}}\\
 \text{\color{red} Paper fees scenario:} \qquad 2.15 \leq y_{\mathbf{Buyer}} \qquad 1.35 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
+
 ![yBuyer/ySeller graph, piContract=101](pics/price_101.png)
 
 For $\texttt{piContract} = 102$:
+
 $$
-\begin{alignat*}{2}
+\begin{alignat*}{3}
 \text{\color{blue} Zero fees scenario:} \qquad  1.50 \leq y_{\mathbf{Buyer}} \qquad 0.75 \leq y_{\mathbf{Seller}}\\
 \text{\color{red} Paper fees scenario:} \qquad 3.77 \leq y_{\mathbf{Buyer}} \qquad 1.06 \leq y_{\mathbf{Seller}}
 \end{alignat*}
 $$
+
 ![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
 
 As one can see, as `piContract` increases the shaded regions migrate to the lower-right end. Again, this makes sense: As the price goes higher, **Buyer** is paying more and more for `gasAllocTX` with respect to current price. This entails that **Buyer** should be more risk-averse to deemm this advantageous, and hence the region moves further to the right on the **Buyer** axis. Specularly, **Seller** is receiving an increasingly better offer compared to the current price, lowering the necessity for risk-aversity. As such, the region grows closer to the **Seller** axis.
