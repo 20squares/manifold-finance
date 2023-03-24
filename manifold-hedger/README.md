@@ -623,12 +623,12 @@ To replicate the results highlighted in the Ledger-Hedger paper, we instantiated
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `buyerWealth`  | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `sellerWealth` | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `buyerWealth`  | $W^{init}_{Buyer}$    | Initial wealth of **Buyer**. | $10^9$           |
+| `sellerWealth` | $W^{init}_{Seller}$   | Initial wealth of **Seller**. |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
-| `piInitial` | $\pi_{initial}$ | Initial gas price | $100$
+| `piInitial` | $\pi_{initial}$ | Initial gas price. | $100$
 | `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
-| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH | `gasAllocTX * piContract`
+| `payment` | $payment$ | The amount **Buyer** pays to **Seller** in LH. | `gasAllocTX * piContract`
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0.1 \cdot 10^6$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $75 \cdot 10^3$  |
@@ -637,7 +637,7 @@ To replicate the results highlighted in the Ledger-Hedger paper, we instantiated
 | `gasPub`   | $g_{pub}$           | Gas size of the TX if issued at current market price. | $5 \cdot 10^6$   |
 
 
-These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed what the authors did by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(x)$. These function represent risk-aversity.
+These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed what the authors did by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(x)$. These functions represent risk-aversity.
 
 Moreover, as specified in the section [Assumptions made explicit](#assumptions-made-explicit), we had to postulate an explicit utility for the transaction that **Buyer** wants to issue. This is represented by the parameter `utilityFromTX`, which has been set to $10^9$.
 
@@ -658,7 +658,7 @@ Another reason why Ledger-Hedger is so sensible is also that players are fundame
 - **Seller** believes price will go down in the between blocks $start$ and $end$.
 - On the contrary, **Buyer** believes that price will go up within the same block interval.
 
-In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity all together: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
+In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity altogether: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
 
 ## Other analyses
 
@@ -668,12 +668,12 @@ First of all, and unsurprisingly, we found that running the model with the follo
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer**. | $10^9$           |
+| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller**. |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
-| `piInitial` | $\pi_{initial}$ | Initial gas price | $100$
+| `piInitial` | $\pi_{initial}$ | Initial gas price. | $100$
 | `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
-| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH | `gasAllocTX * piContract`
+| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH. | `gasAllocTX * piContract`
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $0$  |
