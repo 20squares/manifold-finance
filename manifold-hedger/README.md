@@ -259,7 +259,7 @@ In the Ledger-Hedger paper, players are considered to be risk-averse or at best 
 
 To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result in the standard risk-neutral case.
 
-Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`
+Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`.
 
 In practice, these functions are used as follows (cf. [Code deep dive](#code-deep-dive) for syntax details):
 
