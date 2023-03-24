@@ -152,7 +152,7 @@ The fact that gas price varies with market conditions, generally rising when dem
 - **Buyer**, that wants to issue a given transaction in a future block interval $start < end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
 
-This mechanism defines an interactive game articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
+This mechanism defines an interactive game articulated in two phases, called $\varphi_{setup}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
 
 ![Ledger-Hedger statespace](pics/game_statespace.png)
 
