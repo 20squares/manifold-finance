@@ -37,10 +37,10 @@
       - [Interactive perks](#interactive-perks)
 # Summary
 
-This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular **Seller**). Our model allows for custom definitions of risk-sensitivity for all players.
+This project implements a model based on the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. Our model focuses on a single, exogenously parameterized contract offering that a seller and a buyer need to evaluate and decide whether to accept or not. Our analysis is focused under which conditions the players will accept the hedging contract. Central to the analysis are the assumptions concerning risk preferences, which we vary and investigate systematically. Our model allows for custom definitions of risk-sensitivity for all players.
 
 ## Analytics results
-**The most important finding in our simulations is that Ledger-Hedger is incredibly sensible to initial parameters, and not as robust as we would have expected.**
+**The most important finding in our simulations is that our Ledger-Hedger model is very sensitive to initial parameters and assumptions regarding risk preferences. Contracts are only accepted by players in a relatively narrow band of risk attitudes.**
 
 A more detailed analysis can be found in the section [Analytics](#analytics).
 
