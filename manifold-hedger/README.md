@@ -706,7 +706,7 @@ At $\texttt{piContract} = 98$, we get the following graph:
 
 ![yBuyer/ySeller graph, piContract=98 ](pics/price_98.png)
 
-The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. We have:
+The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As one can see, the red region is strictly contained in the blue one. We have:
 
 $$
 \begin{alignat*}{2}
