@@ -662,7 +662,7 @@ In this scenario, both Players will be much more willing to use Ledger-Hedger, a
 
 ## Other analyses
 
-We ran also some other analyses these can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). 
+We ran also some other analyses, which can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). 
 
 First of all, and unsurprisingly, we found that running the model with the following parameters results in a much bigger utility:
 
