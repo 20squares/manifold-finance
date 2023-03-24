@@ -765,7 +765,7 @@ As one can see, as `piContract` increases the shaded regions migrate to the lowe
 
 ### Sanity checks
 
-In addition to this, we performed some sanity checks: Using the constant distribution (see [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results) for more information), we verified the following things:
+In addition to the analysis, we performed some sanity checks: Using the constant distribution (see [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results) for more information), we verified the following things:
 
 - Setting `epsilon` to 0 results, in the 'zero fees' case, in equilibrium for any choice of risk-aversity for both players. This makes sense: Using the protocol results in zero extra costs. Moreover, both players know with certainty that the future gas price won't change. Hence, risk-aversity does not matter.
 - With *any* other choice of `epsilon` and any other fees, the equilibrium breaks for any choice of risk-aversity, for both players. Again, this makes sense: Both players know with certainty that the future gas price won't change, so payng *any* extra fee to hedge is disadvantageous.
