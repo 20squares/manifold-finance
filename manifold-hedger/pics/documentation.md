@@ -668,12 +668,12 @@ First of all, and unsurprisingly, we found that running the model with the follo
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer**. | $10^9$           |
+| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller**. |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
-| `piInitial` | $\pi_{initial}$ | Initial gas price | $100$
+| `piInitial` | $\pi_{initial}$ | Initial gas price. | $100$
 | `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
-| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH | `gasAllocTX * piContract`
+| `payment` | $payment$ | The amount **Buyer** pays to **Seller** in LH. | `gasAllocTX * piContract`
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $0$  |
