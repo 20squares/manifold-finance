@@ -658,7 +658,7 @@ Another reason why Ledger-Hedger is so sensible is also that players are fundame
 - **Seller** believes price will go down in the between blocks $start$ and $end$.
 - On the contrary, **Buyer** believes that price will go up within the same block interval.
 
-In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity all together: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
+In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity altogether: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
 
 ## Other analyses
 
