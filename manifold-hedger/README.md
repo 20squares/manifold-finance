@@ -37,10 +37,10 @@
       - [Interactive perks](#interactive-perks)
 # Summary
 
-This project implements the model detailed in the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. In particular, we have focused on relaxing some of the assumptions made in the paper around all players being risk-averse (in particular **Seller**). Our model allows for custom definitions of risk-sensitivity for all players.
+This project implements a model based on the [Ledger-Hedger](https://eprint.iacr.org/2022/056.pdf) paper. Our model focuses on a single, exogenously parameterized hedging contract offering that a seller and a buyer need to evaluate and decide whether to accept or not. Our analysis is focused under which conditions the players will accept the hedging contract. Central to the analysis are the assumptions concerning risk preferences, which we vary and investigate systematically. Our model allows for custom definitions of risk-sensitivity for all players.
 
 ## Analytics results
-**The most important finding in our simulations is that Ledger-Hedger is incredibly sensible to initial parameters, and not as robust as we would have expected.**
+**The most important finding in our simulations is that our Ledger-Hedger model is very sensitive to initial parameters and assumptions regarding risk preferences. Contracts are only accepted by players in a relatively narrow band of risk attitudes.**
 
 A more detailed analysis can be found in the section [Analytics](#analytics).
 
@@ -111,7 +111,7 @@ Since under the hood games are nothing more than functions, REPL allows us to se
 This tool is expecially powerful to better understand the structure of the strategies we have to feed to the model, which can grow very complicated as the model scales.
 
 ## Addendum: Installing haskell
-If you dont' have either `haskell` or `stack`, it is necessary to install them. there are many ways to do so; on Linux/macOS systems, we suggest using [ghcup](https://www.haskell.org/ghcup/).
+If you dont' have either `haskell` or `stack`, it is necessary to install them. There are many ways to do so; on Linux/macOS systems, we suggest using [ghcup](https://www.haskell.org/ghcup/).
 In a terminal, type:
 
 ```sh
@@ -152,7 +152,7 @@ The fact that gas price varies with market conditions, generally rising when dem
 - **Buyer**, that wants to issue a given transaction in a future block interval $start < end$. The transaction's gas size - which from now on we will call $g_{alloc}$ to keep consistent with the paper - is presumed fixed.
 - **Seller**, that has a given gas allocation within the above-mentioned timeframe.
 
-This mechanism defines an interactive game articulated in two phases, called $\varphi_{init}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
+This mechanism defines an interactive game articulated in two phases, called $\varphi_{setup}$ and $\varphi_{exec}$, where at each stage **Buyer** and **Seller** can take different choices, as exemplified by the following figure.
 
 ![Ledger-Hedger statespace](pics/game_statespace.png)
 
@@ -251,7 +251,7 @@ Perhaps the most important assumption we made explicit is around the notion of r
 
 In a nutshell, *risk propensity* denotes how much one player prefers a *certain* payoff versus an *uncertain* one. 
     
-    As a simple example, let us imagine a lottery where one can win between 0 and 100 dollars with equal probability. The expected payoff in this scenario is 50 dollars. A *risk-averse* player will prefer to receive 50 dollars with certainty than playing the lottery. On the contrary, a *risk-loving* player will prefer to play the lottery: the hope for a higher payoff wins over the possibility of getting a lower one. A *risk-neutral* player will be unbiased with respect to which game to play.
+>  As a simple example, let us imagine a lottery where one can win between 0 and 100 dollars with equal probability. The expected payoff in this scenario is 50 dollars. A *risk-averse* player will prefer to receive 50 dollars with certainty than playing the lottery. On the contrary, a *risk-loving* player will prefer to play the lottery: the hope for a higher payoff wins over the possibility of getting a lower one. A *risk-neutral* player will be unbiased with respect to which game to play.
 
 In the Ledger-Hedger paper, players are considered to be risk-averse or at best risk-neutral. This makes sense, as the main incentive to use Ledger Hedger is exactly hedging against the uncertainty of future gas price fluctuations:
  - A risk-averse **Buyer** seeks protection against the possibility of prices rising, resulting in bigger expenses;
@@ -259,7 +259,7 @@ In the Ledger-Hedger paper, players are considered to be risk-averse or at best 
 
 To model this assumption explicitly, we relied on [Expected Utility Theory](https://en.wikipedia.org/wiki/Risk_aversion#Utility_of_money): In checking if the game is at equilibrium, the payoffs for both players aren't used as they are (this would be the risk-neutral case). Instead, they are first fed to a couple of functions called `utilityFunctionBuyer` and `utilityFunctionSeller`, that can be defined in any way the modeller wants. They represent the risk propensity of both **Buyer** and **Seller**. A concave function will represent a risk-averse player, whereas a convex function will represent a risk-prone player. Supplying the identity functions will result in the standard risk-neutral case.
 
-Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`
+Besides the identities, we also provided a square root definition and a logarithmic definition for the utility functions, which can be found in `Parametrization.hs`.
 
 In practice, these functions are used as follows (cf. [Code deep dive](#code-deep-dive) for syntax details):
 
@@ -465,7 +465,7 @@ Moreover, the code is divided in two different branches:
 
 # Analytics
 
-Now, we switch focus on *analytics*, which we defined as the set of techniques we employ to verify if and when a supplied results in an *equilibrium*. The notion of *equilibrium* we rely upon is the one of [Nash equilibrium](https://en.wikipedia.org/wiki/Nash_equilibrium), which intuitively describes a situation where, for each player, unilaterally deviating from the chosen strategy results in a loss.
+Now, we switch focus on *analytics*, which we defined as the set of techniques we employ to verify if and when a supplied strategy results in an *equilibrium*. The notion of *equilibrium* we rely upon is the one of [Nash equilibrium](https://en.wikipedia.org/wiki/Nash_equilibrium), which intuitively describes a situation where, for each player, unilaterally deviating from the chosen strategy results in a loss.
 
 
 ## Reading the analytics
@@ -623,12 +623,12 @@ To replicate the results highlighted in the Ledger-Hedger paper, we instantiated
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `buyerWealth`  | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `sellerWealth` | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `buyerWealth`  | $W^{init}_{Buyer}$    | Initial wealth of **Buyer**. | $10^9$           |
+| `sellerWealth` | $W^{init}_{Seller}$   | Initial wealth of **Seller**. |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
-| `piInitial` | $\pi_{initial}$ | Initial gas price | $100$
+| `piInitial` | $\pi_{initial}$ | Initial gas price. | $100$
 | `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
-| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH | `gasAllocTX * piContract`
+| `payment` | $payment$ | The amount **Buyer** pays to **Seller** in LH. | `gasAllocTX * piContract`
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0.1 \cdot 10^6$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $75 \cdot 10^3$  |
@@ -637,7 +637,7 @@ To replicate the results highlighted in the Ledger-Hedger paper, we instantiated
 | `gasPub`   | $g_{pub}$           | Gas size of the TX if issued at current market price. | $5 \cdot 10^6$   |
 
 
-These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed what the authors did by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(x)$. These function represent risk-aversity.
+These parameters were directly pulled from Sec. 6 of the Ledger-Hedger paper. As for the utility functions, we again followed what the authors did by instantiating the utility functions for both **Buyer** and **Seller** to be first $log(x)$ and then $\sqrt(x)$. These functions represent risk-aversity.
 
 Moreover, as specified in the section [Assumptions made explicit](#assumptions-made-explicit), we had to postulate an explicit utility for the transaction that **Buyer** wants to issue. This is represented by the parameter `utilityFromTX`, which has been set to $10^9$.
 
@@ -658,22 +658,22 @@ Another reason why Ledger-Hedger is so sensible is also that players are fundame
 - **Seller** believes price will go down in the between blocks $start$ and $end$.
 - On the contrary, **Buyer** believes that price will go up within the same block interval.
 
-In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity all together: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
+In this scenario, both Players will be much more willing to use Ledger-Hedger, albeit for opposite reasons. Importantly, depending on how skewed these beliefs are, we may dispense of risk-aversity altogether: Even for a risk-loving player hedging would make sense if the player strongly believed that prices would swing towards an unfavorable direction.
 
 ## Other analyses
 
-We ran also some other analyses these can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). 
+We ran also some other analyses, which can be found in the `eq-breaking` branch (see subsection [File structure](#file-structure) for more information). 
 
 First of all, and unsurprisingly, we found that running the model with the following parameters results in a much bigger utility:
 
 | **Parameter**  | **Name in the paper** | **Meaning** | **Value** |
 |:--------------:|:---------------------:|:-----------:|:----------:|
-| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer** | $10^9$           |
-| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller** |$10^9$           |
+| `buyerWealth`       | $W^{init}_{Buyer}$    | Initial wealth of **Buyer**. | $10^9$           |
+| `sellerWealth`       | $W^{init}_{Seller}$   | Initial wealth of **Seller**. |$10^9$           |
 | `collateral`   | $$col$$               | The collateral **Seller** must pay to accept LH contract. | $10^9$           |
-| `piInitial` | $\pi_{initial}$ | Initial gas price | $100$
+| `piInitial` | $\pi_{initial}$ | Initial gas price. | $100$
 | `piContract`      | $\pi_{contract}$               | The price at which **Buyer** buys `gasAllocTX` from **Seller** in the LH contract. | $100$            |
-| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH | `gasAllocTX * piContract`
+| `payment` | $payment$ | The ampount **Buyer** pays to **Seller** in LH. | `gasAllocTX * piContract`
 | `epsilon`      | $\epsilon$            | Technical parameter to disincentivize unwanted behavior from **Seller**. | $1$              |
 | `gasInitiation`| $g_{init}$            | Cost of opening a LH contract. | $0$ |
 | `gasAccept`    | $g_{accept}$          | Cost of accepting a LH contract. | $0$  |
@@ -706,7 +706,7 @@ At $\texttt{piContract} = 98$, we get the following graph:
 
 ![yBuyer/ySeller graph, piContract=98 ](pics/price_98.png)
 
-The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As on can see, the red region is strictly contained in the blue one. We have:
+The blue region represents the 'zero fees' scenario, whereas the red region represents the fees as in the Ledger-Hedger paper. As one can see, the red region is strictly contained in the blue one. We have:
 
 $$
 \begin{alignat*}{2}
@@ -761,11 +761,11 @@ $$
 
 ![yBuyer/ySeller graph, piContract=102](pics/price_102.png)
 
-As one can see, as `piContract` increases the shaded regions migrate to the lower-right end. Again, this makes sense: As the price goes higher, **Buyer** is paying more and more for `gasAllocTX` with respect to current price. This entails that **Buyer** should be more risk-averse to deemm this advantageous, and hence the region moves further to the right on the **Buyer** axis. Specularly, **Seller** is receiving an increasingly better offer compared to the current price, lowering the necessity for risk-aversity. As such, the region grows closer to the **Seller** axis.
+As one can see, as `piContract` increases the shaded regions migrate to the lower-right end. Again, this makes sense: As the price goes higher, **Buyer** is paying more and more for `gasAllocTX` with respect to current price. This entails that **Buyer** should be more risk-averse to deem this advantageous, and hence the region moves further to the right on the **Buyer** axis. Specularly, **Seller** is receiving an increasingly better offer compared to the current price, lowering the necessity for risk-aversity. As such, the region grows closer to the **Seller** axis.
 
 ### Sanity checks
 
-In addition to this, we performed some sanity checks: Using the constant distribution (see [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results) for more information), we verified the following things:
+In addition to the analysis, we performed some sanity checks: Using the constant distribution (see [Replicating the Ledger-Hedger paper results](#replicating-the-ledger-hedger-paper-results) for more information), we verified the following things:
 
 - Setting `epsilon` to 0 results, in the 'zero fees' case, in equilibrium for any choice of risk-aversity for both players. This makes sense: Using the protocol results in zero extra costs. Moreover, both players know with certainty that the future gas price won't change. Hence, risk-aversity does not matter.
 - With *any* other choice of `epsilon` and any other fees, the equilibrium breaks for any choice of risk-aversity, for both players. Again, this makes sense: Both players know with certainty that the future gas price won't change, so payng *any* extra fee to hedge is disadvantageous.
