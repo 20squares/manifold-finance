@@ -25,7 +25,6 @@
             - [Evaluating strategies](#evaluating-strategies)
             - [Stochasticity](#stochasticity)
             - [Branching](#branching-1)
-        - [Stochasticity](#stochasticity)
     - [File structure](#file-structure)
 - [Analytics](#analytics)
     - [Strategies employed in the analysis](#strategies-employed-in-the-analysis)
