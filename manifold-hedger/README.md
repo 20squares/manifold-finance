@@ -2,7 +2,7 @@
 - [Summary](#summary)
     - [Analytics results](#analytics-results)
 - [Installation](#installation)
-    - [Normal execution](#normal-execution)
+    - [Normal execution](#normal-execution
     - [Interactive execution](#interactive-execution)
     - [Addendum: Installing haskell](#addendum-installing-haskell)
 - [Explaining the model](#explaining-the-model)
@@ -404,7 +404,7 @@ You can make parametric changes or even define new strategies and/or notions of 
 
 #### Stochasticity
 
-Our models are Bayesian by default, meaning that they allow for reasoning in probabilitic terms.
+Our models are Bayesian by default, meaning that they allow for reasoning in probabilistic terms.
 
 Practically, this is obtained by relying on the [Haskell Stochastic Package](https://hackage.haskell.org/package/stochastic), which employs monadic techniques.
 
