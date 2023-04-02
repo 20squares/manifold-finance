@@ -2,7 +2,7 @@
 - [Summary](#summary)
     - [Analytics results](#analytics-results)
 - [Installation](#installation)
-    - [Normal execution](#normal-execution
+    - [Normal execution](#normal-execution)
     - [Interactive execution](#interactive-execution)
     - [Addendum: Installing haskell](#addendum-installing-haskell)
 - [Explaining the model](#explaining-the-model)
